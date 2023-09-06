@@ -1,0 +1,12 @@
+name: surface_reconstruction
+services:
+  point_cloud_reconstruction:
+    build:
+      context: ./packages/surface-reconstruction
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    
+    volumes:
+      - "./packages/surface-reconstruction/:/usr/src/app/reconstruction/"
+  
