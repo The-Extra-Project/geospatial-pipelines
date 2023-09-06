@@ -1,3 +1,14 @@
 [submodule "lastools"]
-	path = ./packages/surface-reconstruction/lib/
+	path = ./packages/surface_reconstruction/lib/LAStools
 	url = https://github.com/LAStools/LAStools.git
+[submodule "py3dtiles"]
+	path = ".packages/py3dtiles"
+	url = "https://gitlab.com/Oslandia/py3dtiles.git"
+
+[submodules "surface_reconstruction" ]
+	path = ".packages/surface_reconstruction"
+	url = "https://github.com/The-Extra-Project/sandbox.git"
+
+[submodules "3dTilesRendereerJS"]
+	path = ".packages/3dTilesRendererJS"
+	url = "https://github.com/NASA-AMMOS/3DTilesRendererJS"

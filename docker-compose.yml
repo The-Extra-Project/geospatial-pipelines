@@ -1,12 +1,49 @@
 name: surface_reconstruction
 services:
-  point_cloud_reconstruction:
+  surface_reconstruction:
     build:
-      context: ./packages/surface-reconstruction
+      context: ./packages/surface_reconstruction/
       dockerfile: Dockerfile
     ports:
       - "8081:8081"
     
     volumes:
-      - "./packages/surface-reconstruction/:/usr/src/app/reconstruction/"
+      - "./packages/surface_reconstruction/:/usr/src/app/reconstruction/"
   
+  georender:
+    build:
+      context: ./packages/georender
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+
+    volumes:
+      - "./packages/georender/:/usr/src/app/georender/"
+
+
+  py3dtiles:
+    build:
+      context: ./packages/py3dtiles/
+      dockerfile: docker/Dockerfile
+    
+    ports:
+      - "9080:9080"
+
+
+  threed_tilerenderer:
+    build:
+      context: ./packages/3DTilesRendererJS/
+      dockerfile: ./docker/Dockerfile
+
+    volumes:
+      - "./packages/3DTilesRendererJS/:/data/"
+
+    ports:
+      - "8080:8080"
+
+  bacalhau:
+    build:
+      context: .
+      dockerfile: Dockerfile.bacalhau
+
+    

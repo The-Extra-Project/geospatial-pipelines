@@ -1,0 +1,12 @@
+FROM --platform=x86_64 ubuntu:22.04 
+
+WORKDIR /app
+RUN curl -sL https://get.bacalhau.org/install.sh | bash
+
+ENV path="${PATH}:/usr/bin/app/bacalhau"
+
+COPY ./run_bacalhau.sh /app/run_bacalhau.sh
+
+RUN chmod 777 /app/run_bacalhau.sh
+
+ENTRYPOINT [ "/app/run_bacalhau.sh" ]
