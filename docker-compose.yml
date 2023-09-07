@@ -20,7 +20,6 @@ services:
     volumes:
       - "./packages/georender/:/usr/src/app/georender/"
 
-
   py3dtiles:
     build:
       context: ./packages/py3dtiles/
@@ -28,18 +27,9 @@ services:
     
     ports:
       - "9080:9080"
-
-
-  threed_tilerenderer:
-    build:
-      context: ./packages/3DTilesRendererJS/
-      dockerfile: ./docker/Dockerfile
-
+    
     volumes:
-      - "./packages/3DTilesRendererJS/:/data/"
-
-    ports:
-      - "8080:8080"
+      - "./packages/py3dtiles/data:/app/data"
 
   bacalhau:
     build:
