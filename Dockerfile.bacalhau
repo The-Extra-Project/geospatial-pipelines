@@ -8,4 +8,4 @@ RUN sudo chown root /bin/sh
 
 CMD ["/bin/sh", "-c", "chmod ", "+x"  , "/app/run_bacalhau.sh" ]
 
-ENTRYPOINT [ "/bin/sh " , "-c", "/app/run_bacalhau.sh" ]
+ENTRYPOINT [ "/app/run_bacalhau.sh" ]

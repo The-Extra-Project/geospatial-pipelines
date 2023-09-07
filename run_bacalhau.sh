@@ -2,7 +2,7 @@
 
 # dockedrhub name of the current version of the deployed pipeline.
 
-georender_pipeline=devextralabs/georender
+georender_pipeline=devextralabs/georenderv0.1
 surface_reconstruction=devextralabs/surface_reconstruction
 threeDtiles=devextralabs/py3dtiles
 
@@ -48,13 +48,10 @@ return $cid_cropped_file
 ##  category of reconstruction algorithm you want to implement (0 for advance and 1 for poisson template)
 Xcoord="43.2946"
 Ycoord="5.3695"
-username="test"
-ipfs_shp_file="bafkreicxd6u4avrcytevtvehaaimqbsqe5qerohji2nikcbfrh6ccb3lgu"
-filename="pipeline_template.json"
+# username="test"
+# ipfs_shp_file="bafkreicxd6u4avrcytevtvehaaimqbsqe5qerohji2nikcbfrh6ccb3lgu"
+# filename="pipeline_template.json"
 algorithm_surface_reconstruction="0" #(poisson)
-#params = 
-
-whereis bacalhau
 
 if [ $? -neq 0 ]
 then
@@ -64,7 +61,7 @@ else
     exit 1
 fi
 
-bacalhau docker run  $georender_pipeline -i src="https://${ipfs_shp_file}.ipfs.w3s.link/"   dst="./${username}/datas/"     -- $Xcoord $Ycoord $username $ipfs_shp_file $filename | sed  '^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$' > jobId
+bacalhau docker run  $georender_pipeline -i src="https://${ipfs_shp_file}.ipfs.w3s.link/"   dst="./${username}/datas/"     -- $Xcoord $Ycoord  | sed  '^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$' > jobId
 
 if [ $? -eq 0 ]
 then
@@ -74,10 +71,14 @@ fi
 
 cid_georender = parsingOutput(`echo jobId`)
 
+
+bacalhau docker run  $surface_reconstruction -i src="./datas/" dst="./datas" --       | sed  '^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$' > jobId
+
+
 echo "Now finally conversion of the reconstructed ply format to the 3D tiles for rendering"
 
 ## $(pwd)/data:/usr/src/app/3DTilesRendererJS/data
-bacalhau docker run $threeDtiles -i src="https://${cid_cropped_file}.ipfs.w3s.link/" dst="./${username}/datas/" -- ${cid} 
+bacalhau docker run $threeDtiles -i   -- ${cid} 
 
 
 if [ $? -eq 0 ]
