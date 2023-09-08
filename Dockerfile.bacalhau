@@ -2,10 +2,8 @@ FROM ghcr.io/bacalhau-project/bacalhau:latest
 
 #CMD [ "/bin/sh", "-c", "mkdir /app" ] 
 WORKDIR /app
-COPY ./run_bacalhau.sh /app/run_bacalhau.sh
+COPY ./run_bacalhau.sh /app/bacalhau/run_bacalhau.sh
 
-RUN sudo chown root /bin/sh
+RUN chmod +x  /app/run_bacalhau.sh
 
-CMD ["/bin/sh", "-c", "chmod ", "+x"  , "/app/run_bacalhau.sh" ]
-
-ENTRYPOINT [ "/app/run_bacalhau.sh" ]
+CMD [ "/bin/sh", "-c" , "/app/bacalhau/run_bacalhau.sh" ]

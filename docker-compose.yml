@@ -36,4 +36,9 @@ services:
       context: .
       dockerfile: Dockerfile.bacalhau
 
-    
+  threed_rendering:
+    build:
+      context: ./packages/3DTilesRendererJS
+      dockerfile: docker/Dockerfile
+
+  
