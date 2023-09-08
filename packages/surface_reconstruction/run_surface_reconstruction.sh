@@ -14,3 +14,4 @@ elif ["${2}" = "1"]; then
 
 ## now storing the resulting file on the ipfs network
 /bin/app/cgal/build/normal_and_reconstruction  /usr/app/reconstruction/input_processing.las ${1} && w3 put $output_file 
+

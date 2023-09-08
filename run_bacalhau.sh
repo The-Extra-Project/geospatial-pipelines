@@ -72,14 +72,18 @@ fi
 cid_georender = parsingOutput(`echo jobId`)
 
 
-bacalhau docker run  $surface_reconstruction -i src="./datas/" dst="./datas" --       | sed  '^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$' > jobId
+bacalhau docker run  $surface_reconstruction -i src="./datas/" dst="./datas/out" --  ${cid_georender}  $algorithm_surface_reconstruction    | sed  '^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$' > jobId
 
+
+cid_surface = passingOutput(`echo jobId`)
 
 echo "Now finally conversion of the reconstructed ply format to the 3D tiles for rendering"
 
 ## $(pwd)/data:/usr/src/app/3DTilesRendererJS/data
-bacalhau docker run $threeDtiles -i   -- ${cid} 
+bacalhau docker run $threeDtiles -i src="./data" dst="/usr/src/app/3DTilesRendererJS/data"  -- ${cid_surface}  
 
+
+#$(pwd)/data:/usr/src/app/3DTilesRendererJS/data
 
 if [ $? -eq 0 ]
 then
