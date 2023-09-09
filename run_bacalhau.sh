@@ -1,15 +1,15 @@
 #!/bin/sh
 
 # dockedrhub name of the current version of the deployed pipeline.
-
-georender_pipeline=devextralabs/georenderv0.1
+georender_pipeline=devextralabs/georender
 surface_reconstruction=devextralabs/surface_reconstruction
 threeDtiles=devextralabs/py3dtiles
 
-## params : $1 => cid value of the parameters.
+## params : $1 => jobId of the previous bacalhau executed.
 
 parsingOutput() {
-jid=`cat ${1}`
+
+jid=${1}
 
 ## checking if the job id is valid:
 
@@ -26,7 +26,6 @@ bacalhau generate $jid
 ## fetching the output resulting  las file with pipeline , now then you pass the  unzipped las file to surface reconstruction.
 cd  datas/${suffix}/out/
 
-## TODO: whether these file is temporary or persistent 
 filename = ${ls -a}
 
 ## then passing the given parameter for the surface reconstruction file
@@ -48,31 +47,41 @@ return $cid_cropped_file
 ##  category of reconstruction algorithm you want to implement (0 for advance and 1 for poisson template)
 Xcoord="43.2946"
 Ycoord="5.3695"
-# username="test"
-# ipfs_shp_file="bafkreicxd6u4avrcytevtvehaaimqbsqe5qerohji2nikcbfrh6ccb3lgu"
-# filename="pipeline_template.json"
+username="test"
+ipfs_shp_file="bafkreicxd6u4avrcytevtvehaaimqbsqe5qerohji2nikcbfrh6ccb3lgu"
+filename="pipeline_template.json"
 algorithm_surface_reconstruction="0" #(poisson)
 
-if [ $? -neq 0 ]
+
+# :coordinateX: lattitude coordinate 
+#     :coordinateY: longitude coordinate 
+#     username: username of the user profile
+#     ipfs_cid:  ipfs addresses of the files that you need to run the operation, its the list of the following parameters
+#     - pipeline template file address
+#     - shp files address that you want to process
+
+
+echo `${bacalhau version}`
+
+if [ $? -neq 0]:
 then
     echo "bacalhau is installed"
 else
     echo "bacalhau is not installed"
-    exit 1
 fi
 
-bacalhau docker run  $georender_pipeline -i src="https://${ipfs_shp_file}.ipfs.w3s.link/"   dst="./${username}/datas/"     -- $Xcoord $Ycoord  | sed  '^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$' > jobId
 
-if [ $? -eq 0 ]
+#pattern_jobID="^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$"
+bacalhau docker run  $georender_pipeline -i src="https://${ipfs_shp_file}.ipfs.w3s.link/"   dst="./${username}/datas/"     -- $Xcoord $Ycoord  $username $ipfs_cid $filename
+
+if [[ $? -eq 0 ]]
 then
-    echo "error running the pipeline"
-    exit 1
+echo "the execution was successful"
 fi
 
-cid_georender = parsingOutput(`echo jobId`)
+cid_georender = parsingOutput($param)
 
-
-bacalhau docker run  $surface_reconstruction -i src="./datas/" dst="./datas/out" --  ${cid_georender}  $algorithm_surface_reconstruction    | sed  '^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$' > jobId
+bacalhau docker run  $surface_reconstruction -i src="./datas/" dst="./${username}/datas/"  --  ${cid_georender}  $algorithm_surface_reconstruction    | sed  '^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$' > jobId
 
 
 cid_surface = passingOutput(`echo jobId`)

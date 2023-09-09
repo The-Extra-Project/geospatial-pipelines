@@ -47,7 +47,7 @@ def fetch_shp_file(ipfs_cid, _filename, username) -> str:
     """
     
     # create a directory for the user for the first time.
-    path_datas = os.path.join(os.getcwd() + "/datas")
+    path_datas = os.path.join(os.getcwd() + "/" + username+ "/datas")
     userdir = (path_datas + "/" + username)
 
     ## check if the given userdir is created first time
@@ -66,7 +66,7 @@ def fetch_shp_file(ipfs_cid, _filename, username) -> str:
     else:
         print("file downloaded in {}{}".format(os.getcwd() + '/' +"datas/",_filename))
     
-    return (os.getcwd() + "/datas" +_filename)
+    return (os.getcwd() + "/datas/" +_filename)
   
 def create_bounding_box(latitude_max: int, lattitude_min: int, longitude_max: int, longitude_min: int):
     """
@@ -171,7 +171,7 @@ def generate_pdal_pipeline( dirname: str,pipeline_template_ipfs: str, username: 
     :epsg_srs: is the coordinate standard corresponding to the given template position.
     """
    
-    path_datas = os.path.join(os.getcwd() + "/datas" + username) 
+    path_datas = os.path.join(os.getcwd() + "/datas/" + username) 
     
     url = 'https://' + pipeline_template_ipfs + '.ipfs.w3s.link/pipeline_template.json' 
        
@@ -275,7 +275,7 @@ def run_georender_pipeline_point():
     
     laz_path, fname, dirname = get_tile_details_point(parameters.coordinateX, parameters.coordinateY, parameters.userprofile, parameters.filename, parameters.ipfs_cid)
 
-    os.chdir( os.getcwd() + "/data") 
+    os.chdir( os.getcwd() + parameters.username + "/data") 
     os.mkdir(parameters.userprofile)
     
     # Causes in case if the file has the interrupted downoad.
@@ -321,8 +321,7 @@ def run_georender_pipeline_polygon(cliargs=None):
     parameters = args.parse_args(cliargs)
     
     laz_path, fname, dirname = get_tile_details_point(parameters.coordinateX, parameters.coordinateY, parameters.userprofile, parameters.filename, parameters.ipfs_cid)
-
-    os.chdir( os.getcwd() + "/data") 
+    os.chdir( os.getcwd() + parameters.username + "/datas") 
     os.mkdir(parameters.userprofile)
     
     # Causes in case if the file has the interrupted downoad.
@@ -360,10 +359,10 @@ def las_to_tiles_conversion(username: str):
         
     last_las_file = os.path.abspath("/app/usr/georender/src/data/" + username + "/result.las")
         
-    destination_tile_file = os.getcwd() + username + '/3dtiles'
+    destination_tile_file = os.getcwd() + '/'+ username + '/3dtiles'
     # run the dockerised version of the py3dtiles application
     check_call( ["docker", "run", "-it", "--rm" ,
-            "--mount-type=bind, source= ${}/data".format(os.getcwd()) ,
+            "--mount-type=bind, source= ${}/data".format(os.getcwd() + "/" + username),
             " --target /app/data/" +  destination_tile_file   
             + "registry.gitlab.com/oslandia/py3dtiles:142-create-docker-image" , "convert " , "app/usr/data/" + last_las_file  + "--out" + destination_tile_file ])
 

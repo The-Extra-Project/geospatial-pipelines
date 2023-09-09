@@ -7,3 +7,4 @@ gdal
 requests
 python-dotenv
 laspy
+watchdog

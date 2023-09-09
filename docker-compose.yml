@@ -14,9 +14,15 @@ services:
     build:
       context: ./packages/georender
       dockerfile: Dockerfile
+    x-develop:
+      watch: 
+        - action: sync
+          path: ./packages/georender/
+          target: /usr/src/app/georender/
+          
     ports:
       - "8081:8081"
-
+    
     volumes:
       - "./packages/georender/:/usr/src/app/georender/"
 

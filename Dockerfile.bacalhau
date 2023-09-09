@@ -1,9 +1,34 @@
-FROM ghcr.io/bacalhau-project/bacalhau:latest 
+FROM  ubuntu:22.04 as build
 
+WORKDIR /
+
+# RUN useradd -m sudouser && echo "sudouser:sudouser" | chpasswd && adduser sudouser sudo
+
+# USER sudouser
+
+RUN mkdir -p /usr/app/
+
+RUN apt-get update && apt-get -y install sudo curl 
+
+RUN   curl -sL https://get.bacalhau.org/install.sh | bash  && export PATH=/home/ubuntu/.local/bin:$PATH
+
+# RUN echo "ubuntu ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# RUN sudo apt-get install -y python3-pip && \
+#     sudo pip3 install --upgrade
+
+RUN echo bacalhau version
+## refernece the build from ghcr.io/bacalhau-project/bacalhau:latest
 #CMD [ "/bin/sh", "-c", "mkdir /app" ] 
-WORKDIR /app
 COPY ./run_bacalhau.sh /app/bacalhau/run_bacalhau.sh
 
-RUN chmod +x  /app/run_bacalhau.sh
+
+
+RUN chmod 777  /app/bacalhau/run_bacalhau.sh
+
+FROM build as test
+
+COPY --from=build /usr/app/ /usr/app/
+
 
 CMD [ "/bin/sh", "-c" , "/app/bacalhau/run_bacalhau.sh" ]

@@ -5,7 +5,7 @@
 	path = ".packages/py3dtiles"
 	url = "https://gitlab.com/Oslandia/py3dtiles.git"
 
-[submodules "surface_reconstruction" ]
+[submodules "surface_reconstruction"]
 	path = ".packages/surface_reconstruction"
 	url = "https://github.com/The-Extra-Project/sandbox.git"
 

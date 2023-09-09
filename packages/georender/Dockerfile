@@ -10,16 +10,15 @@ FROM --platform=x86_64 base as builder
 
 RUN mkdir -p /usr/src/app/georender
 
-ENV ENV PIP_DEFAULT_TIMEOUT=100 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PIP_NO_CACHE_DIR=1 
 
-RUN apt-get update && apt-get install -y git wget jq p7zip-full --assume-yes python3-pip  --assume-yes  python3-dev
-
-
-RUN cd /usr/src/app/georender/ &&  pip3 install -r requirements.txt
+COPY requirements.txt /usr/src/app/georender/requirements.txt 
 
 COPY . /usr/src/app/georender/
+
+RUN apt-get update && apt-get install -y git wget jq p7zip-full --assume-yes python3 python3-pip  --assume-yes  
+
+
+RUN cd /usr/src/app/georender/ &&  pip install -r requirements.txt
 
 
 FROM --platform=x86_64 builder as run
@@ -27,6 +26,18 @@ FROM --platform=x86_64 builder as run
 COPY --from=builder /usr/src/app/georender /usr/src/app/georender
 
 WORKDIR /usr/src/app/georender
+
+RUN nohup python watcher.py &
+
+## also either running the below command in order to check the progress of the command: 
+
+RUN watchmedo log \
+    --patterns="*.py;*.txt" \
+    --ignore-directories \
+    --recursive \
+    --verbose \
+
+
 
 
 RUN chmod 777 ./run_module.sh 
