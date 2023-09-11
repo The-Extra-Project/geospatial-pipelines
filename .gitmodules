@@ -1,5 +1,5 @@
 [submodule "lastools"]
-	path = ./packages/surface_reconstruction/lib/LAStools
+	path = "./packages/surface_reconstruction/lib/LAStools"
 	url = https://github.com/LAStools/LAStools.git
 [submodule "py3dtiles"]
 	path = ".packages/py3dtiles"
