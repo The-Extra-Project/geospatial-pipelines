@@ -1,12 +1,16 @@
-FROM --platform=x86_64 pdal/pdal as base
+FROM --platform= pdal/pdal as base
+
+LABEL org.opencontainers.image.description="Pipeline 3D surface reconstruction" \
+      org.opencontainers.image.authors="Dhruv Malik" \
+      org.opencontainers.image.version="0.1"
+
 
 ENV PYTHONFAULTHANDLER=1 \
     PYTHONHASHSEED=random \
     PYTHONUNBUFFERED=1
 
 WORKDIR /
-
-FROM --platform=x86_64 base as builder
+FROM --platform=x86_64 base as build
 
 RUN mkdir -p /usr/src/app/georender
 
@@ -21,21 +25,21 @@ RUN apt-get update && apt-get install -y git wget jq p7zip-full --assume-yes pyt
 RUN cd /usr/src/app/georender/ &&  pip install -r requirements.txt
 
 
-FROM --platform=x86_64 builder as run
+FROM --platform=x86_64 build as run
 
 COPY --from=builder /usr/src/app/georender /usr/src/app/georender
 
 WORKDIR /usr/src/app/georender
 
-RUN nohup python watcher.py &
+#RUN nohup python watcher.py &
 
-## also either running the below command in order to check the progress of the command: 
+## also either running the below command in order to have watch mode (or setting up the nohup script )
 
 RUN watchmedo log \
     --patterns="*.py;*.txt" \
     --ignore-directories \
     --recursive \
-    --verbose \
+    --verbose  .
 
 
 

@@ -1,0 +1,11 @@
+name: Pipeline build
+on:
+     push:
+         branches:
+             - dev
+job:
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v2
+        - name: calling docker build command 
+          run: docker compose build --up

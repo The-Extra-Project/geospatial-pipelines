@@ -16,10 +16,7 @@ from pathlib import Path
 from dotenv import dotenv_values
 import laspy
 
-
-
-
-config = dotenv_values(dotenv_path='.env')
+config = dotenv_values(dotenv_path='../../../.env')
 
 from pyproj import Transformer, Proj
 from functools import partial
@@ -27,6 +24,7 @@ from functools import partial
 from subprocess import check_call
 import shutil
 from osgeo import gdal
+
 ## for handling the SHP files that are streamed / downloaded
 gdal.SetConfigOption('SHAPE_RESTORE_SHX', 'YES')
 
@@ -36,13 +34,12 @@ w3 = API(os.getenv("W3_API_KEY"))
 
 def fetch_shp_file(ipfs_cid, _filename, username) -> str:
     """
-    gets the file that needs to be used for the rendering the resulting surface reconstruction of the given portion
+    gets the shape file from the web3.storage in order to run the surface reconstruction pipeline
     
     Parameters:
 
-    
-    :ipfs_cid: is the CID hash where the file is stored on IPFS
-    :_filename: is the name of the file to be downloaded (with the extension)
+    :ipfs_cid: is the CID hash where the shape file is stored on IPFS
+    :_filename: is the name of the file to be downloaded (with the extension .shp)
     :username: is in which folder the given file is to be stored for maintaining the result separation.
     """
     
@@ -70,26 +67,31 @@ def fetch_shp_file(ipfs_cid, _filename, username) -> str:
   
 def create_bounding_box(latitude_max: int, lattitude_min: int, longitude_max: int, longitude_min: int):
     """
-    Create a bounding box which the user selects to fetch the parameters for the given file parameters
+    Create a bounding box which the user selects to crop the given region for surface reconstruction analysis.
     """
     return Polygon([(longitude_min, lattitude_min), (longitude_max, lattitude_min), (longitude_max, latitude_max), (longitude_min, latitude_max), (longitude_min, lattitude_min)])
 
 
 
-def get_tile_details_polygon(pointargs: list(str), ipfs_cid: str, username: str, filename: str, epsg_standard: list(str) = ['EPSG:4326', 'EPSG:2154']):
+def get_pointcloud_details_polygon(pointargs: list(str), ipfs_cid: str, username: str, filename: str, epsg_standard: list(str) = ['EPSG:4326', 'EPSG:2154']):
     """
-    utility function for generating the tile standard based on the specific boundation defined by the user on the given shp file
-    :pointargs: list of inputs in the format (lattitude_max, lattitude_min, longitude_max, longitude_min)
-    :ipfs_cid: cid of the corresponding shp file to be presented.
-    :username: identifier for the given shp file that is storing the file.
     
-    :epsg_standard: defines the coordinate standards for which the given given coordinate values are to be transformed
-        - by default the coordinates will be taken for french standard, but can be defined based on specific regions.
+    Parameters
+    -----------
+    utility function for cropping the region defined by specific boundation defined by the user on the given shp file
+    pointargs: list of inputs in the format (lattitude_max, lattitude_min, longitude_max, longitude_min)
+    
+    ipfs_cid: cid of the corresponding shp file from which the result is to be cropped.
+    
+    username: identifier for the given shp file that is storing the file.
+    
+    epsg_standard: defines the coordinate standards for which the given given coordinate values are to be transformed
+        - by default the coordinates will be taken for french standard and converted from the normal GPS coordinate standard , but can be defined based on specific regions.
     Returns:
     
-    laz file url which is to be downloaded
-    fname: corresponding file that is to be downloaded
-    dirname: resulting access path to the directory in the given container envionment
+    - laz file url which is to be downloaded
+    - fname: corresponding file that is to be downloaded
+    - dirname: resulting access path to the directory in the given container envionment
     """
     print( "Running tiling with the parameters lat_max={}, lat_min={}, long_max={}, long_min={}, for the user={}".format( pointargs[0], pointargs[1], pointargs[2], pointargs[3], username))
 
@@ -102,8 +104,7 @@ def get_tile_details_polygon(pointargs: list(str), ipfs_cid: str, username: str,
     
     polygonRegion = create_bounding_box(pointargs[0], pointargs[1], pointargs[2], pointargs[3])
 
-    # transformer = Transformer.from_crs( epsg_standard )
-    # coordX, coordY = transformer.transform( coordX, coordY )
+    ## credits from : https://gis.stackexchange.com/questions/127427/transforming-shapely-polygon-and-multipolygon-objects
 
     projection = partial(
         transform, Proj(epsg_standard[0]), Proj(epsg_standard[1])
@@ -163,12 +164,12 @@ def get_tile_details_point(coordX, coordY,username, filename, ipfsCid, epsg_stan
 
 
 
-def generate_pdal_pipeline( dirname: str,pipeline_template_ipfs: str, username: str, epsg_srs:str =  "EPSG:2154" ):
+def generate_pdal_pipeline( dirname: str,pipeline_template_ipfs: str, username: str, epsg_srs:str =  "EPSG:4326" ):
     """
     generates the pipeline json for the given tile structure in the pipeline based on the given template stored on ipfs.
-    :dirname: is the directory where the user pipeline files are stored 
+    :dirname: is the directory where the user pipeline files are stored (by default in /username/)
     :pipeline_template_ipfs: is the reference of the pipeline template is stored.  
-    :epsg_srs: is the coordinate standard corresponding to the given template position.
+    :epsg_srs: is the coordinate standard in which the output pointcloud is represented.
     """
    
     path_datas = os.path.join(os.getcwd() + "/datas/" + username) 
@@ -226,7 +227,7 @@ def generate_pdal_pipeline( dirname: str,pipeline_template_ipfs: str, username: 
 
 
 ## cli functions:
-""" functions to seting up the input and then georender pipeline. 
+""" function for user to upload the shape / pipeline by the user on IPFS network and returns the reference
 """
 def upload_files():
     """
@@ -250,9 +251,9 @@ def upload_files():
 ## Pipeline creation
 def run_georender_pipeline_point():
     """
-    this function the rendering data pipeline of various .laz file and generate the final 3Dtile format.
-    :coordinateX: lattitude coordinate 
-    :coordinateY: longitude coordinate 
+    This function the rendering data pipeline of various .laz file and generate the final 3Dtile format.
+    coordinateX: lattitude coordinate 
+    coordinateY: longitude coordinate 
     username: username of the user profile
     ipfs_cid:  ipfs addresses of the files that you need to run the operation, its the list of the following parameters
     - pipeline template file address
@@ -273,19 +274,21 @@ def run_georender_pipeline_point():
     
     parameters = args.parse_args()
     
-    laz_path, fname, dirname = get_tile_details_point(parameters.coordinateX, parameters.coordinateY, parameters.userprofile, parameters.filename, parameters.ipfs_cid)
+    filepath = os.getcwd() + parameters.username + "/datas"
 
-    os.chdir( os.getcwd() + parameters.username + "/data") 
-    os.mkdir(parameters.userprofile)
+    os.mkdir( filepath)
+    os.chdir(filepath)
+    laz_path, fname, dirname = get_tile_details_point(parameters.coordinateX, parameters.coordinateY, parameters.userprofile, parameters.filename, parameters.ipfs_cid)    
     
     # Causes in case if the file has the interrupted downoad.
     if not os.path.isfile( fname ): 
         check_call( ["wget", "--user-agent=Mozilla/5.0", laz_path])
+    
     # Extract it
     
     check_call( ["7z", "-y", "x", fname] ) 
-    pipeline_ipfs = parameters["ipfs_template_files"]
-    pipeline_file = generate_pdal_pipeline( dirname, pipeline_ipfs, parameters["username"] )
+    pipeline_ipfs = parameters.ipfs_template_files
+    pipeline_file = generate_pdal_pipeline( dirname, pipeline_ipfs, parameters.username)
 
     # run pdal pipeline with the generated json :
     os.chdir( dirname )
@@ -302,7 +305,7 @@ def run_georender_pipeline_point():
     os.chdir()
     check_call(["pdal", "pipeline",pipeline_file])
     
-    shutil.move( 'result.las', '../result.las' )
+    # shutil.move( 'result.las', '../result.las' )
     print('resulting rendering successfully generated, now uploading the files to ipfs')
     cid = w3.post_upload('result.las')
     return cid
@@ -321,8 +324,9 @@ def run_georender_pipeline_polygon(cliargs=None):
     parameters = args.parse_args(cliargs)
     
     laz_path, fname, dirname = get_tile_details_point(parameters.coordinateX, parameters.coordinateY, parameters.userprofile, parameters.filename, parameters.ipfs_cid)
-    os.chdir( os.getcwd() + parameters.username + "/datas") 
-    os.mkdir(parameters.userprofile)
+    filepath = os.getcwd() + parameters.username + "/datas"
+    os.mkdir(filepath)
+    os.chdir(filepath)
     
     # Causes in case if the file has the interrupted downoad.
     if not os.path.isfile( fname ): 
@@ -344,7 +348,6 @@ def run_georender_pipeline_polygon(cliargs=None):
     pipeline_template = parameters["ipfs_cid"][1] 
     check_call( ["pdal", "pipeline",pipeline_template] )
     
-    shutil.move( 'result.las', '../result.las' )
     print('resulting rendering successfully generated, now uploading the files to ipfs')
     w3.post_upload('result.las')
     
@@ -357,14 +360,14 @@ def las_to_tiles_conversion(username: str):
     las_file: corresponds to the las file generated as the result
     """
         
-    last_las_file = os.path.abspath("/app/usr/georender/src/data/" + username + "/result.las")
+    last_las_file = os.path.abspath("/app/usr/georender/src/datas/" + username + "/result.las")
         
     destination_tile_file = os.getcwd() + '/'+ username + '/3dtiles'
     # run the dockerised version of the py3dtiles application
     check_call( ["docker", "run", "-it", "--rm" ,
-            "--mount-type=bind, source= ${}/data".format(os.getcwd() + "/" + username),
-            " --target /app/data/" +  destination_tile_file   
-            + "registry.gitlab.com/oslandia/py3dtiles:142-create-docker-image" , "convert " , "app/usr/data/" + last_las_file  + "--out" + destination_tile_file ])
+            "--mount-type=bind, source= ${}/datas".format(os.getcwd() + "/" + username),
+            " --target /app/datas/" +  destination_tile_file   
+            + "registry.gitlab.com/oslandia/py3dtiles:142-create-docker-image" , "convert " , "app/usr/datas/" + last_las_file  + "--out" + destination_tile_file ])
 
     file_name = os.listdir(destination_tile_file)
         # Causes in case if the file has the interrupted downoad.
@@ -398,10 +401,14 @@ def main(cliargs=None):
 
     args = argparse.ArgumentParser().parse_args(cliargs)
 
-    ## TODO: setting up choice to run both the point and polygon submission jobs. 
-    run_georender_pipeline_point(sys.argv[1:])
+    ## here the sys.argv selects the operation of the pipeline that you want to generate
+    if sys.argv[1] == "0":
+        run_georender_pipeline_point(sys.argv[2:])
+    if sys.argv[1] == "1":
+        run_georender_pipeline_polygon(sys.argv[2:])
+    
     print("now storing the tiled files to the destination web3.storage")
-    las_to_tiles_conversion(cliargs["username"])
+   # las_to_tiles_conversion(cliargs["username"])
 
 if __name__ == "__main__":
     main(sys.argv)

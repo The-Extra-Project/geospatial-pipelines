@@ -9,14 +9,17 @@
         <img src="https://img.shields.io/github/v/release/The-Extra-Project/pipeline-point-cloud-recostruction?display_name=tag" />
     </a>
     <a href="https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction/actions/workflows/go.yml" alt="Tests">
-        <img src="https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction/actions/workflows/go.yml/badge.svg" />
+        <img src="https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction/actions/workflows/build.yml/badge.svg" />
+    </a>
+    <a href="https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction/actions/workflows/go.yml" alt="Tests">
+        <img src="https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction/actions/workflows/build.yml/badge.svg" />
     </a>
     <a href="https://extralabs.xyz/">
         <img alt="extralabs website" src="https://img.shields.io/badge/website-extralabs.xyz-green">
     </a>
 </p>
 
-Running geospatial algorithms pipeline on the raw shape file in order to generate the corresponding reconstructed polygon file. it runs on [bacalhau]() with various docker containers running in parallel
+Running geospatial algorithms pipeline on the raw shape file in order to generate the corresponding reconstructed polygon file. It runs on [bacalhau]() with various docker containers running in parallel.
 
 
 ## packages / components involved (in their working order): 
@@ -30,11 +33,13 @@ Running geospatial algorithms pipeline on the raw shape file in order to generat
 ## Running the pipeline: 
 
 
-first build the indivisual services 
+First build the indivisual services 
+
 ```
 docker compose up --build 
 
 ```
+
 ## Build instruction: 
 1. clone including the submodules : `git clone --recurse-submodules https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction.git`
 
@@ -43,4 +48,9 @@ docker compose up --build
 docker compose up --build 
 ```
 
-3. Run `./run_bacalhau.sh` with the parameters in cli (Xcoord, Ycoord, username, URI of shape file stored, filename of template, algorithm category of poisson reconstruction (0 for advanced and 1 for poisson surface reconstruction)) and then it'll generate the resulting CID of the 3D tiles for the given region.
+3. Run `./run_bacalhau.sh` with the parameters in cli (Xcoord, Ycoord, username, URI of shape file stored, filename of template, algorithm category of poisson reconstruction (0 for advanced and 1 for poisson surface reconstruction)) and then it'll generate:
+    - the resulting CID of the 3D tiles for the given region.
+    - final reconstructed map in vector format.
+    - 3D visualization of the reconstructed map.
+
+

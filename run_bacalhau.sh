@@ -61,7 +61,7 @@ algorithm_surface_reconstruction="0" #(poisson)
 #     - shp files address that you want to process
 
 
-echo `${bacalhau version}`
+echo `$(bacalhau version)`
 
 if [ $? -neq 0]:
 then
@@ -74,12 +74,12 @@ fi
 #pattern_jobID="^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$"
 bacalhau docker run  $georender_pipeline -i src="https://${ipfs_shp_file}.ipfs.w3s.link/"   dst="./${username}/datas/"     -- $Xcoord $Ycoord  $username $ipfs_cid $filename
 
-if [[ $? -eq 0 ]]
+if [[$? -eq 0]];
 then
 echo "the execution was successful"
 fi
 
-cid_georender = parsingOutput($param)
+cid_georender = parsingOutput $param
 
 bacalhau docker run  $surface_reconstruction -i src="./datas/" dst="./${username}/datas/"  --  ${cid_georender}  $algorithm_surface_reconstruction    | sed  '^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$' > jobId
 
