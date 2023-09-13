@@ -1,5 +1,8 @@
 FROM  ubuntu:22.04 as build
 
+
+ARG UBUNTU_FRONTEND=noninteractive
+
 WORKDIR /
 
 # RUN useradd -m sudouser && echo "sudouser:sudouser" | chpasswd && adduser sudouser sudo

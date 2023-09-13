@@ -2,13 +2,13 @@ cmake_minimum_required(VERSION 3.1...3.15)
 
 project( surface_reconstruction )
 
-set(main_SOURCE_DIR ".")
 set(LAS_LIBRARIES "./lib/LAStools" )
-set(CGAL_DATA_DIR "./datas" )
+set(main_SOURCE_DIR, ".")
 # CGAL and its components
 find_package( CGAL QUIET COMPONENTS  )
 find_package (Eigen3)
 
+INCLUDE(${main_SOURCE_DIR}/FindLAS.cmake)
 
 
 if ( NOT CGAL_FOUND )
@@ -16,7 +16,6 @@ if ( NOT CGAL_FOUND )
   return()  
 endif()
 
-INCLUDE(${PROJECT_SOURCE_DIR}/FindLAS.cmake)
 
 
 message(STATUS "CGAL_FOUND : ${CGAL_FOUND}")
@@ -43,7 +42,7 @@ include(${CGAL_USE_FILE})
 # Creating entries for target: main
 # ############################
 
-add_executable( normal_and_reconstruction  ${PROJECT_SOURCE_DIR}/src/normal_and_reconstruction.cpp)
+add_executable( normal_and_reconstruction  ${main_SOURCE_DIR}/src/normal_and_reconstruction.cpp)
 target_link_libraries(normal_and_reconstruction CGAL::CGAL ${LAS_LIBRARIES})
 
 add_to_cached_list( CGAL_EXECUTABLE_TARGETS compute_normals )

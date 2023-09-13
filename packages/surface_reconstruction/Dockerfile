@@ -9,15 +9,13 @@ RUN apt-get update &&  apt-get install -y cmake build-essential libeigen3-dev li
 
 RUN mkdir -p /usr/src/app/reconstruction
 
-
-
-
-WORKDIR /usr/src/app
+WORKDIR /usr/src/app/reconstruction
 
 COPY ./CMakeLists.txt /usr/src/app/reconstruction/CMakeLists.txt
 COPY ./FindLAS.cmake /usr/src/app/reconstruction/FindLAS.cmake
-COPY ./src/ /usr/src/app/reconstruction/src/
 COPY ./lib/LAStools /usr/src/app/reconstruction/lib/LAStools
+COPY ./ /usr/src/app/reconstruction/
+
 ##  building the lastools:
 
 RUN mkdir -p  /usr/src/app/reconstruction/lib/LAStools/build/ \
@@ -30,8 +28,11 @@ RUN mkdir -p /usr/src/app/reconstruction/build \
     && cmake ../ -DCMAKE_BUILD_TYPE=Release \
     && make 
 
+RUN chmod +x run_surface_reconstruction.sh
+
 FROM --platform=x86_64 build as run
 
 COPY --from=build /usr/src/app/reconstruction /usr/src/app/reconstruction
 
-ENTRYPOINT [ "./reconstruction/run_surface_reconstruction.sh" ]
+
+ENTRYPOINT [ "./run_surface_reconstruction.sh" ]
