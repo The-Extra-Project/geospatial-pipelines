@@ -7,23 +7,27 @@ RUN apt-get update &&  apt-get install -y cmake build-essential libeigen3-dev li
 
 ## setting up the build enviornment and build files: 
 
+WORKDIR /
 RUN mkdir -p /usr/src/app/reconstruction
+
+
+COPY ./CMakeLists.txt /usr/src/app/reconstruction/CMakeLists.txt
+# COPY ./FindLAS.cmake /usr/src/app/reconstruction/FindLAS.cmake
+# COPY ./lib/LAStools /usr/src/app/reconstruction/lib/LAStools
+# COPY ./src/ /usr/src/app/reconstruction/src/
+ADD ./ /usr/src/app/reconstruction/
 
 WORKDIR /usr/src/app/reconstruction
 
-COPY ./CMakeLists.txt /usr/src/app/reconstruction/CMakeLists.txt
-COPY ./FindLAS.cmake /usr/src/app/reconstruction/FindLAS.cmake
-COPY ./lib/LAStools /usr/src/app/reconstruction/lib/LAStools
-COPY ./ /usr/src/app/reconstruction/
 
 ##  building the lastools:
 
-RUN mkdir -p  /usr/src/app/reconstruction/lib/LAStools/build/ \
-    && cd /usr/src/app/reconstruction/lib/LAStools/build \
+RUN mkdir -p  ./lib/LAStools/build/ \
+    && cd ./lib/LAStools/build \
     && cmake ../ -DCMAKE_BUILD_TYPE=Release \
     && make
 
-RUN mkdir -p /usr/src/app/reconstruction/build \
+RUN mkdir -p  ../build \
     && cd /usr/src/app/reconstruction/build \
     && cmake ../ -DCMAKE_BUILD_TYPE=Release \
     && make 

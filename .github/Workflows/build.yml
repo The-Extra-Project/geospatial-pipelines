@@ -3,9 +3,12 @@ on:
      push:
          branches:
              - dev
+             - main
 job:
     runs-on: ubuntu-latest
     steps:
         - uses: actions/checkout@v2
-        - name: calling docker build command 
-          run: docker compose build --up
+        - name: docker build for  georender
+          run: docker compose build georender
+        - name: docker build for surface_reconstruction 
+          run: docker compose build surface_reconstruction
