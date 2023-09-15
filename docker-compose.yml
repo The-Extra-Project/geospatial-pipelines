@@ -35,8 +35,6 @@ services:
     ports:
       - "9080:9080"
     
-    volumes:
-      - "./packages/py3dtiles/data:/app/data"
 
   bacalhau:
     build:

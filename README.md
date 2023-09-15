@@ -23,22 +23,13 @@ Running geospatial algorithms pipeline on the raw shape file in order to generat
 
 
 ## packages / components involved (in their working order): 
-- [georender](./packages/georender/): is the first step in reconstruction. it takes user input for the given region to be reconstructed, and then crops the specific region from the raw lidar point in order to generate the lidar.
--  [surface-construction](./packages/surface_reconstruction/): this job takes the result from georender, and then passes the raw point cloud to the GDAL reconstruction function in order to generate the corresponding PLY file.
+- [georender](./packages/georender/): is the first step in reconstruction. it takes user input for the given region to be reconstructed, and then crops the specific region from the raw lidar point in order to crop the relevatn point of interest to be generated.
+
+-  [surface-construction](./packages/surface_reconstruction/): this job takes the result from georender, and then passes the raw point cloud to the GDAL reconstruction pipeline in order to generate the corresponding PLY file.
 
 - [py3dtile](./packages/py3dtiles/): this job converts the given ply file into 3dtile specification, which is then parsed by any visualization software in order to get the result.
 
 - [3dtilerendererJS](./packages/3DTilesRendererJS/): finally this is the visualization package that runs the 3dtile specification and then visualizes the result.
-
-## Running the pipeline: 
-
-
-First build the indivisual services 
-
-```
-docker compose up --build 
-
-```
 
 ## Build instruction: 
 
@@ -58,5 +49,8 @@ docker compose up --build
 5. Run `./run_bacalhau.sh` with the parameters in cli (Xcoord, Ycoord, username, URI of shape file stored, filename of template, algorithm category of poisson reconstruction (0 for advanced and 1 for poisson surface reconstruction)) and then it'll generate:
     - The resulting CID of the 3D tiles for the given region.
     - Final reconstructed map in vector format.
-    - 3D visualization of the reconstructed map.
 
+6. Now the user has to deploy the '3DTilerenderJS' package and then pass the value of CID identifier for rendered tiles.
+
+## Credits:
+1. Research article on the creation of pointcloud pipeline for [nimes](https://github.com/bertt/nimes).
