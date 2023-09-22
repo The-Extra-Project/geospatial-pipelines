@@ -40,8 +40,12 @@ services:
 
   bacalhau:
     build:
-      context: .
+      context: ./packages/bacalhau_pipeline/
       dockerfile: Dockerfile.bacalhau
+    environment:
+      - EMAIL
+    ports:
+      - "5001:5001"
 
   threed_rendering:
     build:

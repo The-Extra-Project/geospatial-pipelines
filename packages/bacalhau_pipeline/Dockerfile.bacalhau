@@ -33,21 +33,13 @@ RUN source $NVM_DIR/nvm.sh \
 ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
 ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
-# confirm installation
-RUN node -v
-RUN npm -v
-
-
-
 RUN curl -sL https://get.bacalhau.org/install.sh | bash  && export PATH=/home/ubuntu/.local/bin:$PATH
 
 RUN npm install -g @web3-storage/w3cli
 
-## add your own corresponding web3-storage key in the docker-compose 
-##ENV KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDZENUE1NmQxYTFEZDAzYmFhZjkyQTUwOTA1NzIwQWJmMDdkOTQzQkEiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2ODI1ODUzMDgxMzgsIm5hbWUiOiJleHRyYS1jb21tdW5pdHktQVBJIn0.CW_1s8nBQwb-GZF_R4SPI4NQsKP7KETuaGRssAkekTc"
-## RUN echo ${KEY} | w3 token -y
-
-RUN w3 authorize malikdhruv1994@gmail.com
+ENV EMAIL="malikdhruv1994@gmail.com"
+## NOTE: this is one time verification where user will have to validate 2FA from their mail.
+RUN w3 authorize $EMAIL
 
 # RUN echo "ubuntu ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
@@ -65,4 +57,4 @@ RUN chmod +x  /app/bacalhau/run_bacalhau.sh
 ## use buildkit to speed up the build process by referencing the previous cached builds if the changes are only in the bash script.
 FROM build as run
 COPY --from=build /usr/app/ /usr/app/
-CMD [ "/bin/sh", "-c" , "/app/bacalhau/run_bacalhau.sh" ]
+ENTRYPOINT [ "/app/bacalhau/run_bacalhau.sh" ]
