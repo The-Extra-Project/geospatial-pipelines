@@ -8,10 +8,7 @@
     <a href="https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction/releases/" alt="Release">
         <img src="https://img.shields.io/github/v/release/The-Extra-Project/pipeline-point-cloud-recostruction?display_name=tag" />
     </a>
-    <a href="https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction/actions/workflows/go.yml" alt="Tests">
-        <img src="https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction/actions/workflows/build.yml/badge.svg" />
-    </a>
-    <a href="https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction/actions/workflows/go.yml" alt="Tests">
+    <a href="https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction/actions/workflows/build.yml" alt="Tests">
         <img src="https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction/actions/workflows/build.yml/badge.svg" />
     </a>
     <a href="https://extralabs.xyz/">
@@ -22,10 +19,9 @@
 Running geospatial algorithms pipeline on the raw shape file in order to generate the corresponding reconstructed polygon file. It runs on [bacalhau]() with various docker containers running in parallel.
 
 
-## packages / components involved (in their working order): 
-- [georender](./packages/georender/): is the first step in reconstruction. it takes user input for the given region to be reconstructed, and then crops the specific region from the raw lidar point in order to crop the relevatn point of interest to be generated.
-
--  [surface-construction](./packages/surface_reconstruction/): this job takes the result from georender, and then passes the raw point cloud to the GDAL reconstruction pipeline in order to generate the corresponding PLY file.
+## packages / components involved: 
+- [georender](./packages/georender/): is the first step in reconstruction. it takes user input for the given region to be reconstructed, and then crops the specific region from the raw lidar point in order to generate the lidar.
+-  [surface-construction](./packages/surface_reconstruction/): this job takes the result from georender, and then passes the raw point cloud to the GDAL reconstruction function in order to generate the corresponding PLY file.
 
 - [py3dtile](./packages/py3dtiles/): this job converts the given ply file into 3dtile specification, which is then parsed by any visualization software in order to get the result.
 

@@ -4,7 +4,6 @@
 #include <CGAL/IO/write_ply_points.h>
 #include <CGAL/jet_estimate_normals.h>
 #include <CGAL/scanline_orient_normals.h>
-
 // === Surface reconstruction includes ===
 #include <CGAL/Shape_detection/Efficient_RANSAC.h>
 #include <CGAL/structure_point_set.h>

@@ -1,6 +1,7 @@
 
-"""georenderin contract."""
-"""georender package script."""
+"""georender package script
+it crops the specific region from the given geoordinate of the given shape file and then regenerates it into the laz file.
+"""
 import argparse
 import geopandas as gpd
 import json
@@ -256,9 +257,8 @@ def run_georender_pipeline_point():
     coordinateY: longitude coordinate 
     username: username of the user profile
     ipfs_cid:  ipfs addresses of the files that you need to run the operation, its the list of the following parameters
-    - pipeline template file address
-    - shp files address that you want to process
-    
+        - pipeline template file address
+        - shp files address that you want to process
     filename: name of the file stored on the given ipfs.
     """
     # Uses geopanda and shapely to intersect gps coord with available laz tiles files

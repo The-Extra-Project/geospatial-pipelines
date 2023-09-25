@@ -7,7 +7,7 @@ from watchdog.events import LoggingEventHandler
 
 """
 credits to watchdog: https://pypi.org/project/watchdog/
-helps to save the reloading time for each corresponding changes
+helps to save the reloading time for each corresponding changes in the docker by doing hot module reloading.
 
 """
 if __name__ == "__main__":    

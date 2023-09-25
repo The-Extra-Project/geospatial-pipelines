@@ -1,6 +1,7 @@
 #!/bin/sh
 # dockerhub name of the current version of the deployed pipelines, change them to your corresponding build pipelines.
 
+# ECR registry of the current verion of the pipeline.
 georender_pipeline=devextralabs/georender
 surface_reconstruction=devextralabs/surface_reconstruction
 threeDtiles=devextralabs/py3dtiles
@@ -10,17 +11,19 @@ threeDtiles=devextralabs/py3dtiles
 
 parsingOutput() {
 jid=${1}
-## see the result
-bacalhau describe "$jid" 
-## finding the first octet of the job id,  for geenrating the foldername storing the output file
 
+## finding the first octet of the job id:
 octets=$(echo "${jid}" | tr "-" " " | cut -b 1-8)
-suffix="job_""${octets}" 
+
+output_folder="job_""${octets}" # 
 
 ## now passing the output generated to the surface reconstruction pipeline: 
 bacalhau generate "$jid"
 
-if [ -d "'datas/' + ${suffix} + '/out/'" ];
+## fetching the output resulting  las file with pipeline , now then you pass the  unzipped las file to surface reconstruction.
+cd  "datas/""${output_folder}""/out/"
+
+if [ $? -eq 0 ];
 then
     echo "bacalhau is installed"
 else
@@ -44,20 +47,23 @@ return "$cid_result_file"
 ## parameters:
 ## point coordinates (X/Y) for the specific region to be rendered
 ## IPFS CID of the given shape file that you want to run.
+## IPFS CID of the pipeline template that you want to generate
 ## filename of the template
 ## username of the person running the job
-val=$(bacalhau version)
+##  category of reconstruction algorithm you want to implement (0 for advance and 1 for poisson template)
+# Xcoord="43.2946"
+# Ycoord="5.3695"
+# Username="test"
+# ipfs_shp_file="bafkreicxd6u4avrcytevtvehaaimqbsqe5qerohji2nikcbfrh6ccb3lgu"
+# ipfs_template_file=""
+# filename="pipeline_template.json"
+# algorithm_surface_reconstruction="0" #(poisson)
 
-if [ "$val" -eq 0 ];
-then
-    echo "bacalhau is not installed"
-else
-    echo "bacalhau is installed"
-fi
 
-pattern_jobID="^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$"
+pattern_jobID='s/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/p'
 
-jobId=$(bacalhau docker run  $georender_pipeline  --  "$1" "$2" "$3" "$4" "$5"  | sed "$pattern_jobID")
+bacalhau docker run $georender_pipeline  -- ${1} ${2} ${3} ${4} ${5} ${6}
+
 
 if [ $? -eq 0 ];
 
@@ -65,19 +71,14 @@ then
 echo "the execution was successful"
 fi
 
-# cid_georender=parsingOutput $jobId
 
-# ## now running the surface reconstruction and getting the result 
+jobId= $(echo $(echo $param | sed -n $pattern_jobID))
 
-# jobId="$(bacalhau docker run  $surface_reconstruction --  "$(cid_georender)"  "${6}"  | sed  "$pattern_jobID")"
+echo $jobId
 
-# echo "Now finally conversion of the reconstructed ply format to the 3D tiles for rendering"
+cid_georender=parsingOutput jobId
 
-# cid_threeDTIles=passingOutput $jobId
-
-# ## $(pwd)/data:/usr/src/app/3DTilesRendererJS/data
-# bacalhau docker run $threeDtiles -i  -- "$(cid_threeDTIles)"
-
+bacalhau docker run  $surface_reconstruction --  "$(cid_georender)"  ${6}  | sed -n  $pattern_jobID > jobId
 
 # #$(pwd)/data:/usr/src/app/3DTilesRendererJS/data
 # if [ $? -eq 1 ];
