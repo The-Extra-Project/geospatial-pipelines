@@ -1,5 +1,0 @@
-FIND_LIBRARY(LAS_LIBRARIES liblas.so ./lib/LAStools/build/)
-
-if ( LAS_LIBRARIES )
- MESSAGE(STATUS "LAS OK")
-endif ( LAS_LIBRARIES )
