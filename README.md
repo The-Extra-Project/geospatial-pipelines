@@ -1,6 +1,7 @@
-# pipeline-point-cloud-recostruction
+# Pipeline-point-cloud-to-CityGML-reconstruction
 
-**E2E pipeline to analyze the raw lidar 3D point cloud data and then convert to finished polygon file for visualization** 
+**E2E pipeline to generate the CityGML file and visualization corresponding to the processed pointcloud/Mesh file** 
+
 <p align="left">
     <a href="https://github.com/https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction.git/LICENSE.md" alt="License">
         <img src="https://img.shields.io/badge/license-MIT-green" />
@@ -16,24 +17,16 @@
     </a>
 </p>
 
-Running geospatial algorithms pipeline on the raw shape file in order to generate the corresponding reconstructed polygon file. It runs on [bacalhau]() with various docker containers running in parallel.
+## Packages / components involved: 
 
 
-## packages / components involved: 
-- [georender](./packages/georender/): is the first step in reconstruction. it takes user input for the given region to be reconstructed, and then crops the specific region from the raw lidar point in order to generate the lidar.
--  [surface-construction](./packages/surface_reconstruction/): this job takes the result from georender, and then passes the raw point cloud to the GDAL reconstruction function in order to generate the corresponding PLY file.
-
-- [py3dtile](./packages/py3dtiles/): this job converts the given ply file into 3dtile specification, which is then parsed by any visualization software in order to get the result.
-
-- [3dtilerendererJS](./packages/3DTilesRendererJS/): finally this is the visualization package that runs the 3dtile specification and then visualizes the result.
-
-## Running the pipeline: 
+## Run instructions: 
 
 
-First build the indivisual services 
+this pipeline depends on the [pipeline-point-cloud-infrastructure]()
 
 ```
-docker compose up --build 
+docker compose run bacalhau_pipeline. 
 
 ```
 
