@@ -12,3 +12,6 @@
 [submodule "3dTilesRendereerJS"]
 	path = ".packages/3dTilesRendererJS"
 	url = "https://github.com/NASA-AMMOS/3DTilesRendererJS"
+[submodule "packages/surface_reconstruction/lib/PoissonRecon"]
+	path = packages/surface_reconstruction/lib/PoissonRecon
+	url = https://github.com/mkazhdan/PoissonRecon.git

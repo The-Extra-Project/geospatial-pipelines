@@ -1,4 +1,4 @@
-name: Pipeline build
+name: Pipeline build passing
 on:
      push:
          branches:
@@ -10,5 +10,8 @@ job:
         - uses: actions/checkout@v2
         - name: docker build for  georender
           run: docker compose build georender
-        - name: docker build for surface_reconstruction 
+        - name: docker build for surface_reconstruction pipeleine
           run: docker compose build surface_reconstruction
+
+        - name: And finally for bacalhau pipeline
+          run: docker compose build bacalhau

@@ -2,19 +2,25 @@ cmake_minimum_required(VERSION 3.1...4.15)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE Debug)
 
+## PoissonRecon
+set(DEFAULT_FEM_DEGREE, 1)
+set(DEFAULT_FEM_BOUNDARY, "Neumann" )
 
-project( main )
-
+project( pipeline_pointcloud )
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(LAS_LIBRARIES "./lib/LAStools" )
 set(CGAL_DATA_DIR ".")
 set(EIGEN_dir "/usr/include/eigen3/")
+set(CGAL_EIGEN3_ENABLED ON)
+
 # CGAL and its components
 find_package( CGAL QUIET COMPONENTS  )
-find_package (Eigen3)
+# Eigen3 for the compilation of the point_reconstruction module of CGAL.
+find_package(Eigen3)
 include(${CGAL_USE_FILE})
 
 if ( NOT CGAL_FOUND )
@@ -40,21 +46,22 @@ find_package(Eigen3)
 include( ${EIGEN3_USE_FILE} )  
 
 message(STATUS "laslib : ${LAS_LIBRARIES}")
+message("CGAL version: ${CGAL_VERSION}")
+message("pipeline_pointcloud_source_DIR: ${pipeline_pointcloud_SOURCE_DIR}")
 include(${CMAKE_CURRENT_SOURCE_DIR}/FindLAS.cmake)
+
 # include for local directory
-include_directories(${main_SOURCE_DIR}/lib/LAStools/LASlib/inc/)
-include_directories(${main_SOURCE_DIR}/lib/LAStools/LASzip/src/)
-include_directories(${main_SOURCE_DIR}/usr/src/app/lib/)
+include_directories(${pipeline_pointcloud_SOURCE_DIR}/lib/LAStools/)
+include_directories(${pipeline_pointcloud_SOURCE_DIR}/lib/LAStools/LASlib/inc/)
+include_directories(${pipeline_pointcloud_SOURCE_DIR}/lib/LAStools/LASzip/src/)
+include_directories(${pipeline_pointcloud_SOURCE_DIR}/lib/PoissonRecon/)
+include_directories(${pipeline_pointcloud_SOURCE_DIR}/build/)
 
 include_directories(${CGAL_INCLUDE_DIRS}/eigen3/)
-
-find_package(Eigen3 REQUIRED)
-
 link_directories(${Eigen3_INCLUDE_DIRS})
 
-# Creating entries for target: NORMAL_AND
 # ############################
-add_executable( normal_and_reconstruction  ${main_SOURCE_DIR}/src/normal_and_reconstruction.cpp)
+add_executable( normal_and_reconstruction  ${pipeline_pointcloud_SOURCE_DIR}/src/normal_and_reconstruction.cpp)
 target_link_libraries(normal_and_reconstruction CGAL::CGAL ${CGAL_LIBRARIES})
 target_link_libraries(normal_and_reconstruction CGAL::CGAL ${LAS_LIBRARIES})
 target_link_libraries(normal_and_reconstruction CGAL::CGAL ${Eigen3_LIBRARIES})

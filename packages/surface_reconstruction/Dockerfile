@@ -9,17 +9,11 @@ RUN mkdir -p /usr/src/app/reconstruction
 
 
 COPY ./CMakeLists.txt /usr/src/app/reconstruction/CMakeLists.txt
-# COPY ./FindLAS.cmake /usr/src/app/reconstruction/FindLAS.cmake
-# COPY ./lib/LAStools /usr/src/app/reconstruction/lib/LAStools
-# COPY ./src/ /usr/src/app/reconstruction/src/
+
 ADD ./ /usr/src/app/reconstruction/
 
 WORKDIR /usr/src/app/reconstruction
 
-# COPY ./CMakeLists.txt /usr/src/app/reconstruction/CMakeLists.txt
-# COPY ./FindLAS.cmake /usr/src/app/reconstruction/FindLAS.cmake
-# COPY ./lib/LAStools /usr/src/app/reconstruction/lib/LAStools
-# COPY ./ /usr/src/app/reconstruction/
 
 COPY ./lib/  ./lib/  
 COPY ./CMakeLists.txt ./CMakeLists.txt
