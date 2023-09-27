@@ -23,9 +23,9 @@ include_directories(/tmp/boost)
 include_directories(/tmp/libjpeg)
 
 find_package(Boost REQUIRED)
-message("BOOST_DIR", ${BOOST_ROOT})
+message("BOOST_DIR:${BOOST_ROOT}")
 
-find_package(libJPEG )
+find_package(libJPEG REQUIRED)
 
 add_executable(PoissonRecon ${poisson__SOURCE_DIR}/Src/PoissonRecon.cpp)
 

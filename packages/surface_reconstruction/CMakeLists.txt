@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.1...4.15)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Debug)
+set(libjpeg_DIR, "/usr/include/libjpeg")
+
 
 ## PoissonRecon
 set(DEFAULT_FEM_DEGREE, 1)
@@ -45,6 +47,9 @@ endif()
 find_package(Eigen3)
 include( ${EIGEN3_USE_FILE} )  
 
+
+add_subdirectory(${pipeline_pointcloud_SOURCE_DIR}/lib/PoissonRecon/)
+
 message(STATUS "laslib : ${LAS_LIBRARIES}")
 message("CGAL version: ${CGAL_VERSION}")
 message("pipeline_pointcloud_source_DIR: ${pipeline_pointcloud_SOURCE_DIR}")
@@ -54,7 +59,6 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/FindLAS.cmake)
 include_directories(${pipeline_pointcloud_SOURCE_DIR}/lib/LAStools/)
 include_directories(${pipeline_pointcloud_SOURCE_DIR}/lib/LAStools/LASlib/inc/)
 include_directories(${pipeline_pointcloud_SOURCE_DIR}/lib/LAStools/LASzip/src/)
-include_directories(${pipeline_pointcloud_SOURCE_DIR}/lib/PoissonRecon/)
 include_directories(${pipeline_pointcloud_SOURCE_DIR}/build/)
 
 include_directories(${CGAL_INCLUDE_DIRS}/eigen3/)

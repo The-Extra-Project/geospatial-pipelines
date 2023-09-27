@@ -36,7 +36,7 @@ ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 RUN curl -sL https://get.bacalhau.org/install.sh | bash  && export PATH=/home/ubuntu/.local/bin:$PATH
 
 RUN npm install -g @web3-storage/w3cli
-
+## Add the user email or use from the docker compose yaml
 ENV EMAIL=""
 ## NOTE: this is one time verification where user will have to validate 2FA from their mail.
 RUN w3 authorize $EMAIL

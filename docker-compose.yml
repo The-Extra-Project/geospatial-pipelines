@@ -50,4 +50,9 @@ services:
       context: ./packages/3DTilesRendererJS
       dockerfile: docker/Dockerfile
 
+  architecture:
+    build:
+      context: aws_deployment/
+      dockerfile: .
+
   

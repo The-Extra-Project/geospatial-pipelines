@@ -16,12 +16,17 @@
     </a>
 </p>
 
-Running geospatial algorithms pipeline on the raw shape file in order to generate the corresponding reconstructed polygon file. It runs on [bacalhau]() with various docker containers running in parallel.
+Running geospatial algorithms pipeline on the raw shape file in order to generate the corresponding reconstructed 3D polygon mesh of the given region given the coordinates by the user. It runs the pipeline service on the cloud that  runs series of computation algorithms on the pipeline (as defined in the [packages](./packages/) section) which are executed on bacalhau.
 
 
 ## packages / components involved: 
 - [georender](./packages/georender/): is the first step in reconstruction. it takes user input for the given region to be reconstructed, and then crops the specific region from the raw lidar point in order to generate the lidar.
--  [surface-construction](./packages/surface_reconstruction/): this job takes the result from georender, and then passes the raw point cloud to the GDAL reconstruction function in order to generate the corresponding PLY file.
+
+
+-  [surface-construction](./packages/surface_reconstruction/): this job takes the result from georender, and then passes the raw point cloud to the various surface normalization and reconstruction algorithms that user can choose based on their requirements as follows:
+    - [poisson reconstruction (by CGAL)](): 
+    - [advanced reconstruction algorithm (on CGAL)]()
+    - [multisolver poissonRecon adapted version from the algorithm]()
 
 - [py3dtile](./packages/py3dtiles/): this job converts the given ply file into 3dtile specification, which is then parsed by any visualization software in order to get the result.
 
@@ -47,6 +52,8 @@ docker compose up --build
     - Final reconstructed map in vector format.
 
 6. Now the user has to deploy the '3DTilerenderJS' package and then pass the value of CID identifier for rendered tiles.
+
+7. run the E2E testing pipeline by running the deployment pipeline from [e2e](./e2e/) folder.
 
 ## Credits:
 1. Research article on the creation of pointcloud pipeline for [nimes](https://github.com/bertt/nimes).
