@@ -38,7 +38,7 @@ services:
 
   bacalhau:
     build:
-      context: ./packages/bacalhau_pipeline/
+      context: ./packages/bacalhau_pipeline_unit_workflow/
       dockerfile: Dockerfile.bacalhau
     environment:
       - EMAIL

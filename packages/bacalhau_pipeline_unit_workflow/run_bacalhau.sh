@@ -21,7 +21,7 @@ output_folder="job_""${octets}" #
 bacalhau generate "$jid"
 
 ## fetching the output resulting  las file with pipeline , now then you pass the  unzipped las file to surface reconstruction.
-cd  "datas/""${output_folder}""/out/"
+cd  "datas/"${output_folder}"/out/"
 
 if [ $? -eq 0 ];
 then

@@ -5,7 +5,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Debug)
 set(libjpeg_DIR, "/usr/include/libjpeg")
 
-
 ## PoissonRecon
 set(DEFAULT_FEM_DEGREE, 1)
 set(DEFAULT_FEM_BOUNDARY, "Neumann" )

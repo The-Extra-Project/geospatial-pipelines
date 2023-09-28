@@ -2,3 +2,6 @@
 **/CMakeFiles
 **/LAStools
 .aws/
+**/.venv
+**/__pycache__
+**/.pytest_cache
