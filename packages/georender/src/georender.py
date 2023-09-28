@@ -173,8 +173,7 @@ def generate_pdal_pipeline( dirname: str,pipeline_template_ipfs: str, username: 
     :epsg_srs: is the coordinate standard in which the output pointcloud is represented.
     """
    
-    path_datas = os.path.join(os.getcwd() + "/datas/" + username) 
-    
+    path_datas = os.path.join(os.getcwd() + username + "/datas/")     
     url = 'https://' + pipeline_template_ipfs + '.ipfs.w3s.link/pipeline_template.json' 
        
     try:

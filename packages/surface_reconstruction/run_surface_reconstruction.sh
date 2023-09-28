@@ -18,6 +18,7 @@ elif [ "${3}" = "2" ]; then
     true
     ## depth and pointWeight parameter to be defined to be fixed based on the user
     /bin/app/cgal/lib/PoissonRecon/PoissonRecon --in "$output_file" --out "$output_file" --depth 8 --pointWeight 0
+    exit 1
 fi
 
 
