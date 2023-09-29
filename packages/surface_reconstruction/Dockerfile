@@ -35,11 +35,6 @@ rm -rf /tmp/*
 ## setting up the build enviornment and build files: 
 RUN mkdir -p /usr/src/app/reconstruction
 
-
-COPY ./CMakeLists.txt /usr/src/app/reconstruction/CMakeLists.txt
-
-ADD ./ /usr/src/app/reconstruction/
-
 WORKDIR /usr/src/app/reconstruction
 
 
