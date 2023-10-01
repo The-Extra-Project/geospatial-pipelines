@@ -35,7 +35,6 @@ services:
     ports:
       - "9080:9080"
     
-
   bacalhau:
     build:
       context: ./packages/bacalhau_pipeline_unit_workflow/
@@ -54,5 +53,3 @@ services:
     build:
       context: aws_deployment/
       dockerfile: .
-
-  
