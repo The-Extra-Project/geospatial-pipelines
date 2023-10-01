@@ -1,9 +1,0 @@
-py3dtiles
-geopandas
-shapely
-pyproj
-gdal
-requests
-python-dotenv
-laspy
-watchdog
