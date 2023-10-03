@@ -1,0 +1,3 @@
+[submodule "packages/reconstruction-image/lib/colmap"]
+	path = packages/reconstruction-image/lib/colmap
+	url = https://github.com/colmap/colmap.git
