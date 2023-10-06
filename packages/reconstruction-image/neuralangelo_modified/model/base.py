@@ -27,7 +27,6 @@ class Model(torch.nn.Module):
         """Return device on which model resides."""
         return next(self.parameters()).device
 
-
 ## functions for initializing the weights
 
 def weights_init(init_type: str, gain, bias=None):

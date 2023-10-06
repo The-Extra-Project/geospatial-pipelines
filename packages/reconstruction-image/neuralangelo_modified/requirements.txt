@@ -22,7 +22,6 @@ FastAPI
 torch
 torchvision
 torchaudio
-
 scikit-image
 scikit-video
 scipy
@@ -32,3 +31,4 @@ termcolor
 tqdm
 trimesh
 wandb
+pynvml

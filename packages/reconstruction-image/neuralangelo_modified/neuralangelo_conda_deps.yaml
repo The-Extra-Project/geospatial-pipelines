@@ -1,0 +1,26 @@
+# env files if user wants to set with conda enviornment
+name: neuralangelo_modified
+channels:
+  - conda-forge
+  - pytorch
+dependencies:
+  # general
+  - gpustat
+  - gdown
+  - cudatoolkit-dev==11.7.0
+  - cmake
+  # python general
+  - python=3.8
+  - pip
+  - numpy
+  - scipy
+  - ipython
+  - jupyterlab
+  - cython
+  - ninja
+  - diskcache
+  # pytorch
+  - pytorch
+  - torchvision
+  - pip:
+    - -r requirements.txt
