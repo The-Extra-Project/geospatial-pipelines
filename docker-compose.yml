@@ -1,4 +1,4 @@
-name: surface_reconstruction
+name: pipeline_reconstruction
 services:
   surface_reconstruction:
     build:
