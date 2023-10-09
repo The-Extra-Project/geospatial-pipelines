@@ -35,33 +35,28 @@ rm -rf /tmp/*
 ## setting up the build enviornment and build files: 
 RUN mkdir -p /usr/src/app/reconstruction
 
-
-COPY ./CMakeLists.txt /usr/src/app/reconstruction/CMakeLists.txt
-
-ADD ./ /usr/src/app/reconstruction/
-
-WORKDIR /usr/src/app/reconstruction
+WORKDIR /
 
 
-COPY ./lib/  ./lib/  
-COPY ./CMakeLists.txt ./CMakeLists.txt
-COPY ./FindLAS.cmake ./FindLAS.cmake
-COPY  . .
-RUN realpath --relative-to="FindLAS.cmake" "CMakeLists.txt" 
-
+COPY ./lib/  ./usr/src/app/reconstruction/lib/  
+COPY ./CMakeLists.txt ./usr/src/app/reconstruction/CMakeLists.txt
+COPY ./FindLAS.cmake ./usr/src/app/reconstruction/FindLAS.cmake
+COPY ./ ./usr/src/app/reconstruction/
+ADD --chown=user:777  ./src/ ./usr/src/app/reconstruction/src/
 ##  building the lastools:
 
-RUN mkdir -p  ./lib/LAStools/build/ \
-    && cd ./lib/LAStools/build \
+RUN mkdir -p  /usr/src/app/reconstruction/lib/LAStools/build/ \
+    && cd /usr/src/app/reconstruction/lib/LAStools/build \
     && cmake ../ -DCMAKE_BUILD_TYPE=Release \
     && make
 
-RUN mkdir -p ./build \
-    && cd ./build \
+RUN mkdir -p /usr/src/app/reconstruction/build \
+    && cd /usr/src/app/reconstruction/build \
     && cmake ../ -DCMAKE_BUILD_TYPE=Release \
     && make 
 
-COPY  . .
+COPY  run_surface_reconstruction.sh ./
+
 RUN chmod +x run_surface_reconstruction.sh
 
 FROM --platform=x86_64 build as run
