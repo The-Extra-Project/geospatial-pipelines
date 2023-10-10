@@ -2,7 +2,8 @@ import functools
 import torch.distributed as dist
 from contextlib import contextmanager
 import torch
-
+from neuralangelo_modified.utils.config import Model
+from torch.optim import lr_scheduler
 def master_only(func):
     r"""Apply this function only to the master GPU."""
     @functools.wraps(func)
@@ -13,6 +14,100 @@ def master_only(func):
         else:
             return None
     return wrapper
+
+@master_only
+def master_only_print(*args):
+    r"""master-only print"""
+    print(*args)
+
+## trainer jobs
+
+@master_only
+def get_optimizer(cfg_optim, model: Model ):
+    r""" return the optimizers
+        Args:
+            cfg_optim(obj): Configuration for specific optimization module.
+            model(obj): Pytorch network module
+        Return
+            object:  object corresponding to pytorch optimizer 
+    """
+    return (model.get_param_groups(cfg_optim)  if hasattr(model, 'get_param_groups') else model.parameters())        
+
+
+
+@master_only
+def get_scheduler(cfg_optim, optim):
+    """
+    getting the scheduler object of the various training jobs. here based on the configuration defining the category of training in configuration
+    Args:
+        cfg_optim (obj): Config for the specific optimization module (gen/dis).
+        optim (obj): PyTorch optimizer object.
+
+    Returns:
+        (obj): Scheduler
+    """
+    
+    if cfg_optim.sched.type == "linear_warmup":
+        x = (x / cfg_optim.sched.warmup if x < cfg_optim.sched.warmup else  1.0)
+        scheduler = lr_scheduler.LambdaLR(optimizer=optim, lr_lambda=(x,))
+    elif cfg_optim.sched.type == 'step':
+        scheduler = lr_scheduler.StepLR(optim,
+                                        step_size=cfg_optim.sched.step_size,
+                                        gamma=cfg_optim.sched.gamma)
+    elif cfg_optim.sched.type == 'constant':
+        scheduler = lr_scheduler.LambdaLR(optim, lambda x: 1)
+        
+    elif cfg_optim.sched.type == 'cosine_warmup':
+
+        warmup_scheduler = lr_scheduler.LinearLR(
+            optim,
+            start_factor=1.0 / cfg_optim.sched.warmup,
+            end_factor=1.0,
+            total_iters=cfg_optim.sched.warmup
+        )
+        T_max_val = cfg_optim.sched.decay_steps - cfg_optim.sched.warmup
+        cosine_lr_scheduler = lr_scheduler.CosineAnnealingLR(
+            optim,
+            T_max=T_max_val,
+            eta_min=getattr(cfg_optim.sched, 'eta_min', 0),
+        )
+        scheduler = lr_scheduler.SequentialLR(
+            optim,
+            schedulers=[warmup_scheduler, cosine_lr_scheduler],
+            milestones=[cfg_optim.sched.warmup]
+        )
+        
+        
+    elif cfg_optim.sched.type == 'linear':
+        # Start linear decay from here.
+        decay_start = cfg_optim.sched.decay_start
+        # End linear decay here.
+        # Continue to train using the lowest learning rate till the end.
+        decay_end = cfg_optim.sched.decay_end
+        # Lowest learning rate multiplier.
+        decay_target = cfg_optim.sched.decay_target
+        
+        decay = ((x - decay_start) * decay_target + decay_end - x) / (decay_end - decay_start)
+        
+        scheduler = lr_scheduler.LambdaLR(optim, lambda x: decay)
+    elif cfg_optim.sched.type == 'step_with_warmup':
+        # The step_size and gamma follows the signature of lr_scheduler.StepLR.
+        step_size = cfg_optim.sched.step_size,
+        gamma = cfg_optim.sched.gamma
+        # An additional parameter defines the warmup iteration.
+        warmup_step_size = cfg_optim.sched.warmup_step_size
+        
+        lr_after_warmup = gamma ** (warmup_step_size // step_size)
+        
+        lr_lambda = gamma ** (x // step_size)
+        
+        scheduler = lr_scheduler.LambdaLR(optim, lambda x: lr_lambda)
+        
+    else:
+        return NotImplementedError('Learning rate policy {} not implemented.'.format(cfg_optim.sched.type))
+    
+    return scheduler
+
 
 def is_master():
     r"""check if current process is the master"""
@@ -128,8 +223,6 @@ def trim_test_samples(data, max_samples=None):
                 data[key] = value[:max_samples]
         else:
             raise TypeError
-
-
 
 def broadcast_object_list(message, src=0):
     r"""broadcast the messages from across the GPU nodes"""

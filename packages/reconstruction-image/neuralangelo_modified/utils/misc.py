@@ -747,6 +747,20 @@ def get_trainers(cfg, is_inference=True, seed=0):
 
 
 
+def cal_model_parameters(model: torch.nn.Module):
+    '''
+    Args:
+    model (obj): object identifying the model which is to be trained
+    
+    
+    '''
+    init_params = 0
+    for p in model.parameters():
+        if p.requires_grad:
+            init_params += p.numel()
+    return init_params
+    
+
 
 def wrap_model(cfg, model):
     r""" provides wrapper function on top of pytorch distributed data parallel training 

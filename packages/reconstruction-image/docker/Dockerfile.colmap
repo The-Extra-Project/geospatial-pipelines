@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
     libboost-system-dev \
     libboost-test-dev \
     libeigen3-dev \
+    p7zip-full \
     libflann-dev \
     libfreeimage-dev \
     libmetis-dev \
@@ -35,6 +36,10 @@ RUN git clone https://github.com/colmap/colmap.git && cd colmap && git checkout 
 RUN cd colmap && mkdir build && cd build && cmake .. -DCUDA_ENABLED=ON -DCMAKE_CUDA_ARCHITECTURES="70;72;75;80;86" -GNinja
 RUN cd colmap/build && ninja && ninja install
 
+
+
+
+
 # additional python packages
 RUN apt-get update && apt-get install -y \
     pip \
@@ -49,8 +54,11 @@ RUN pip install \
     pyyaml \
     trimesh
 
+
+FROM build as run
 WORKDIR /app
 
-COPY . ./app/
 
-CMD [ "/bin/bash", "-c", "python3", "app/main.py" ]
+COPY ../etl_pipeline/migrate.py ./app/migrate.py
+
+CMD [ "/bin/bash", "-c" ]
