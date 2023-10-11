@@ -15,8 +15,6 @@ import w3storage
 class Migration():
     
     client: boto3.client
-    
-    
     ## ref from the stackoverflow (to log the process in the subprocess): 
     
     def log_subprocess_output(pipe):
@@ -33,22 +31,25 @@ class Migration():
     def get_size(self,folder_name):
         total_size =0
         for _file in self.client.list_objects(
-            Bucket=self.bucket_url, Prefix=folder_name)["Contents"]:
+            Bucket=self.bucket_name, Prefix=folder_name)["Contents"]:
             total_size += _file["Size"]
             return total_size
     
         
                
     def transfer_data(self,folder_name, storage_type, **kwargs):
-        os.mkdir(folder_name)
-        os.chdir(folder_name)
-        dataset_download = requests.get(self.url, stream=True)
-        ## download the dataset from curl with specific folder for the output
-        check_call(['curl', self.url, '-o', 'neuralangelo_dataset.7z'])
+        if not os.path.exists(folder_name):
+            os.mkdir(folder_name)
+            os.chdir(folder_name)
+            dataset_download = requests.get(self.url, stream=True)
+            ## download the dataset from curl with specific folder for the output
+            check_call(['curl', self.url, '-o', 'neuralangelo_dataset.7z'])
         ## extract the dataset from the 7z file
-        with py7zr.SevenZipFile('neuralangelo_dataset.7z', mode='r') as z:
-            z.extractall()
-        os.chdir('../')
+            with py7zr.SevenZipFile('neuralangelo_dataset.7z', mode='r') as z:
+                z.extractall()
+        
+            os.chdir('../')
+        
         
         if storage_type == "AWS":
             try:
@@ -80,10 +81,23 @@ class Migration():
         exitcode = self.process.wait()
         print('exit code:'+ exitcode)
         
+    def parsing_config(dataset_name):
+        """
+        parses the associate files (calibration data) of the given dataset in order to merge and provide the colmap informatiopn from the ETH dataset.
+        dataset_name: this corresponds to the dataset information 
+        """
+        
+        path = os.path(os.getcwd() + "/eth_dataset/"+ dataset_name + "/dslr_calibration_undistorted")
+
+        # with open(path + "/cameras.txt", "r") as f:
+        #     lines = f.readlines()
+            
+
+
         
         
 if __name__ == "__main__":
-    migration = Migration('neuralangelo-dataset', 'https://www.eth3d.net/data/multi_view_training_dslr_undistorted.7z', w3_storage_token='', region ='us-east-1')
-    migration.run_colmap_transformations('./eth_dataset')                  
-                    
+    migration = Migration('neuralangelo-dataset', bucket_name= "" , url='https://www.eth3d.net/data/multi_view_training_dslr_undistorted.7z', w3_storage_token='', region ='us-east-1')
+    #migration.run_colmap_transformations('./eth_dataset')                  
+    migration.transfer_data('eth_dataset', 'AWS')               
         
