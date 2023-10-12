@@ -2,8 +2,11 @@ py3dtiles
 geopandas
 shapely
 pyproj
-gdal
+numpy==1.26.0
+GDAL==3.7.1.1
 requests
 python-dotenv
 laspy
 watchdog
+
+

@@ -1,7 +1,9 @@
 
 """georender package script
-it crops the specific region from the given geoordinate of the given shape file and then regenerates it into the laz file.
+it crops the specific region from the given geoordinate of the given shape file and then regenerates it into the laz file for reconstruction.
 """
+
+
 import argparse
 import geopandas as gpd
 import json
@@ -11,7 +13,6 @@ from web3Storage import API
 import os
 from subprocess import run
 import logging
-from py3dtiles  import Tileset
 import sys
 from pathlib import Path
 from dotenv import dotenv_values
@@ -24,7 +25,7 @@ from functools import partial
 
 from subprocess import check_call
 import shutil
-from osgeo import gdal
+from GDAL import gdal
 
 ## for handling the SHP files that are streamed / downloaded
 gdal.SetConfigOption('SHAPE_RESTORE_SHX', 'YES')
@@ -35,7 +36,7 @@ w3 = API(os.getenv("W3_API_KEY"))
 
 def fetch_shp_file(ipfs_cid, _filename, username) -> str:
     """
-    gets the shape file from the web3.storage in order to run the surface reconstruction pipeline
+    gets the shape file from the web3.storage as input, in order to run the surface reconstruction pipeline
     
     Parameters:
 
@@ -76,7 +77,6 @@ def create_bounding_box(latitude_max: int, lattitude_min: int, longitude_max: in
 
 def get_pointcloud_details_polygon(pointargs: list(str), ipfs_cid: str, username: str, filename: str, epsg_standard: list(str) = ['EPSG:4326', 'EPSG:2154']):
     """
-    
     Parameters
     -----------
     utility function for cropping the region defined by specific boundation defined by the user on the given shp file

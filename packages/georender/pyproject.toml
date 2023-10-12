@@ -1,44 +1,36 @@
-[tool.coverage.run]
-branch = true
-source = [ "src" ]
 
-[project]
+[tool.poetry]
 name = "georender"
 version = "0.0.1"
 description = "package to run geospatial rendering jobs"
 authors = ["Dhruv Malik", "Laurent C.", "Jean" ]
-readme = 'README.md'
 
-  [packages]
-  include = "src/"
+packages =  [{include = "georender.py", from = "src"}]
 
-  [dependencies]
-  python = ">3.9.7"
-  py3dtiles = "*"
-  geopandas = "==0.13.2"
-  shapely = "==2.0.1"
-  pyproj = "*"
-  gdal = "^3.7.1.1"
-  requests = "^2.31.0"
-  python-dotenv = "^1.0.0"
-  laspy = "^2.5.1"
-  
-  [dev.dependencies]
-  autopep8 = "2.0.2"
-  flake8 = "6.0.0"
-  pytest = "7.3.1"
-  pytest-sugar = "0.9.7"
-  pytest-cov = "4.1.0"
-  pytest-html = "3.2.0"
-  
+[tool.poetry.dependencies]
+python = ">3.9.7"
+py3dtiles = "*"
+geopandas = "==0.13.2"
+shapely = "==2.0.1"
+pyproj = "*"
+gdal= "3.7.1.1"
+requests = "^2.31.0"
+python-dotenv = "^1.0.0"
+laspy = "^2.5.1"
 
-  [setuptools]
-  packages=["georender"]
-  package-dir = {"" = "src"}
+[tool.poetry.group.dev.dependencies]
+autopep8 = "2.0.2"
+flake8 = "6.0.0"
+pytest = "7.3.1"
+pytest-sugar = "0.9.7"
+pytest-cov = "4.1.0"
+pytest-html = "3.2.0"
 
-  [scripts]
-  test = 'scripts:test'
-  
+
+[setuptools]
+packages=["georender"]
+package-dir = {"" = "src"}
+
 
 [build-system]
 requires = ["setuptools>=61.0"]

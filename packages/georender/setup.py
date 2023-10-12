@@ -31,15 +31,13 @@ def read_requirements(path):
         if not line.startswith(('"', "#", "-", "git+"))
     ]
 
-
 setup(
-    name="project_name",
+    name="georender",
     version="0.0.1",
-    description="full setup for 3D pipeline",
+    description="runs the script that crops the specific point cloud data for surface reconstruction analysis",
     url="https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction",
     long_description_content_type="text/markdown",
     author="Dhruv",
-    packages=find_packages(exclude=["tests", ".github"]),
-    install_requires=read_requirements("requirements.txt"),
-    
+    packages=find_packages(exclude=["tests"]),
+    install_requires=read_requirements("requirements.txt") 
 )
