@@ -16,11 +16,9 @@ ENV PYTHONFAULTHANDLER=1 \
 
 RUN python3 -m venv /opt/venv
 
-COPY requirements.txt . 
+COPY requirements.txt requirements.txt 
 
-
-RUN  . /opt/venv/bin/activate &&  pip install -r requirements.txt
-
+RUN  pip install -r requirements.txt
 
 COPY . .
 
@@ -28,13 +26,12 @@ FROM base as run
 
 
 COPY --chmod=777 --from=base  /usr/src/app/georender/ /usr/src/app/georender/
+
 WORKDIR /usr/src/app/georender
 
-
 EXPOSE 8081
-#RUN chmod  a+x ./run_module.sh 
-RUN chmod +x /usr/src/app/georender/src/georender.py
-CMD [ "python georender.py", "34 42 badkkhkhskdh kslsdjlkjsdklsdj test value" ]
-#RUN  . /opt/venv/bin/activate && exec python georender.py 
-#ENTRYPOINT [  "./run_module.sh" ]   
-#RUN /usr/src/app/georender/src/georender.py 34 42 badkkhkhskdh kslsdjlkjsdklsdj test value
+
+
+RUN chmod +x ./src/georender.py && chmod +x run_georender_test.sh
+
+ENTRYPOINT [ "./run_module.sh" ]     

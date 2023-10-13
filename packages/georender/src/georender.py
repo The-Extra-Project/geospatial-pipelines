@@ -25,10 +25,10 @@ from functools import partial
 
 from subprocess import check_call
 import shutil
-from GDAL import gdal
+# from GDAL import gdal
 
-## for handling the SHP files that are streamed / downloaded
-gdal.SetConfigOption('SHAPE_RESTORE_SHX', 'YES')
+# ## for handling the SHP files that are streamed / downloaded
+# gdal.SetConfigOption('SHAPE_RESTORE_SHX', 'YES')
 
 ## api to access the w3 storage.
 w3 = API(os.getenv("W3_API_KEY"))
@@ -75,7 +75,7 @@ def create_bounding_box(latitude_max: int, lattitude_min: int, longitude_max: in
 
 
 
-def get_pointcloud_details_polygon(pointargs: list(str), ipfs_cid: str, username: str, filename: str, epsg_standard: list(str) = ['EPSG:4326', 'EPSG:2154']):
+def get_pointcloud_details_polygon(pointargs: any, ipfs_cid: str, username: str, filename: str, epsg_standard: any = ['EPSG:4326', 'EPSG:2154']):
     """
     Parameters
     -----------
@@ -126,7 +126,7 @@ def get_pointcloud_details_polygon(pointargs: list(str), ipfs_cid: str, username
     return laz_path, fname, dirname
 
 
-def get_tile_details_point(coordX, coordY,username, filename, ipfsCid, epsg_standards: list(str) = ['EPSG:4326', 'EPSG:2154'] ):
+def get_tile_details_point(coordX, coordY,username, filename, ipfsCid, epsg_standards: any = ['EPSG:4326', 'EPSG:2154'] ):
     """
     utility function to get the tile information for the given boundation
     :coordX: X coordinate of the given region
@@ -249,7 +249,7 @@ def upload_files():
     return loaded_files_cid
 
 ## Pipeline creation
-def run_georender_pipeline_point():
+def run_georender_pipeline_point(cliargs):
     """
     This function the rendering data pipeline of various .laz file and generate the final 3Dtile format.
     coordinateX: lattitude coordinate 
@@ -263,15 +263,15 @@ def run_georender_pipeline_point():
     # Uses geopanda and shapely to intersect gps coord with available laz tiles files
     # Returns corresponding download url and filename
     
-    args = argparse.ArgumentParser(description="runs the georender pipeline based on the given geometric point")
-    args.add_argument("coordinateX", help="write lattitude in source coordinate system")
-    args.add_argument("coordinateY", required=True)
-    args.add_argument("username")
-    args.add_argument("ipfs_shp_files", required=True)
-    args.add_argument("ipfs_template_files", required=True)
-    args.add_argument("filename_template")
+    #args = argparse.ArgumentParser(description="runs the georender pipeline based on the given geometric point")
+    # args.add_argument("coordinateX", help="write lattitude in source coordinate system")
+    # args.add_argument("coordinateY", required=True)
+    # args.add_argument("username")
+    # args.add_argument("ipfs_shp_files", required=True)
+    # args.add_argument("ipfs_template_files", required=True)
+    # args.add_argument("filename_template")
     
-    parameters = args.parse_args()
+    parameters = args.parse_args(cliargs)
     
     filepath = os.getcwd() + parameters.username + "/datas"
 
@@ -309,20 +309,30 @@ def run_georender_pipeline_point():
     cid = w3.post_upload('result.las')
     return cid
 
-def run_georender_pipeline_polygon(cliargs=None):
+
+
+def run_georender_pipeline_polygon(cliargs):
     """
     This function allows to run pipeline for the given bounded location and gives back the rendered 3D tileset
     :coordinates: a list of 4 coordinates [lattitude_max, lattitude_min, longitude_max, longitude_min ]
     ::    
     """
     args = argparse.ArgumentParser(description="runs the georender pipeline based on the given geometric polygon")
-    args.add_argument("coordinates", nargs=4, help="writes the bounding coordinates (longitude max/ min and then lattitude points separated by ,)")
-    args.add_argument("username")
-    args.add_argument("ipfs_cid",nargs='+',help="compulsory: adds the ipfs of the raw cloud image and the corresponding pipeline template. add first the cid of laz file and then of the pipeline template (separated by the space)", required=True)
-    args.add_argument("filename", help="defines the filename of the given laz file that you want to generate 3D points for")
+    # args.add_argument("coordinates", nargs=4, help="writes the bounding coordinates (longitude max/ min and then lattitude points separated by ,)")
+    # args.add_argument("username")
+    # args.add_argument("ipfs_cid",nargs='+',help="compulsory: adds the ipfs of the raw cloud image and the corresponding pipeline template. add first the cid of laz file and then of the pipeline template (separated by the space)", required=True)
+    # args.add_argument("filename", help="defines the filename of the given laz file that you want to generate 3D points for")
     parameters = args.parse_args(cliargs)
     
-    laz_path, fname, dirname = get_tile_details_point(parameters.coordinateX, parameters.coordinateY, parameters.userprofile, parameters.filename, parameters.ipfs_cid)
+    if cliargs.longitude_range_polygon:
+        params_longitude = cliargs.longitude_range_polygon.split(',')
+
+    if cliargs.lattitude_range_polygon:
+        params_lattitude = cliargs.lattitude_range_polygon.split(',')
+
+    pointargs = [params_longitude[0], params_lattitude[0], params_longitude[1], params_lattitude[1]]
+    
+    laz_path, fname, dirname = get_pointcloud_details_polygon(pointargs=pointargs,ipfs_cid=cliargs.ipfs_shp_files, username= cliargs.username)
     filepath = os.getcwd() + parameters.username + "/datas"
     os.mkdir(filepath)
     os.chdir(filepath)
@@ -377,7 +387,7 @@ def las_to_tiles_conversion(username: str):
 
 
 
-def laz_to_las_conversion(in_laz, out_las):
+def laz_to_las_conversion(in_laz):
     """
     conversion of the other vector file format into las for further pre-processing
     in_laz: user supplied file.
@@ -388,26 +398,25 @@ def laz_to_las_conversion(in_laz, out_las):
 
 
 
-def laz_to_ply_conversion():
-    """
-    conversion from the vector file format to polygon mesh format 
-    note: ( only for testing purposes, as its still not optimized for better rendering putposes)
-    
-    """
 
-
-def main(cliargs=None):
-
-    args = argparse.ArgumentParser().parse_args(cliargs)
-
+def main(cliargs):
     ## here the sys.argv selects the operation of the pipeline that you want to generate
-    if sys.argv[1] == "0":
-        run_georender_pipeline_point(sys.argv[2:])
-    if sys.argv[1] == "1":
-        run_georender_pipeline_polygon(sys.argv[2:])
+    if cliargs.option == "0":
+        run_georender_pipeline_point(cliargs=cliargs)
+    if cliargs.option  == "1":
+        run_georender_pipeline_polygon(cliargs=cliargs)
     
-    print("now storing the tiled files to the destination web3.storage")
-   # las_to_tiles_conversion(cliargs["username"])
 
 if __name__ == "__main__":
-    main(sys.argv)
+    parser = argparse.ArgumentParser("crops the given 3D point cloud for the user")
+    parser.add_argument("--option",type=int, default="0", help="chooses the algorithm to run in order to run the cropping job as point(0) opr deifning as polygon(1)")
+    parser.add_argument("--Xcoord",required= False, help="if point chosen,defines the longitude across which the cropping is to be started")
+    parser.add_argument("--Ycoord", required= False, help= "if point chosen,defines the lattitude across which the cropping is to be started")
+    parser.add_argument("--longitude_range_polygon", type= str, required= False, help="if chosen polygon job, its the range of longitude between which the cropping is done")
+    parser.add_argument("--lattitude_range_polygon", type= str, required= False, help="if chosen polygon job, its the range of lattitude between which the cropping is done")
+    parser.add_argument("--username", type=str, required= True,help="name (discord/telegram) of the user running this job")
+    parser.add_argument("--ipfs_shp_files", type=str,required= True, help="IPFS cid of the shape file which is to be cropped from")
+    parser.add_argument("--ipfs_template_files", required=True, help="IPFS cid of the template file which is to be generated")
+    parser.add_argument("--filename_template", required=True, help= "name of the template file which is to be added to the result")
+    args = parser.parse_args()
+    main(args)
