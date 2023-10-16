@@ -19,37 +19,14 @@
 
 ## Packages / components involved: 
 
-
-
-
+- [threed_fier_module]: it gets the general cropped mesh file from the pipeline pointcloud,  and then it generates the LoD1 version of the cityGML format.
 
 ## Run instructions: 
+1. Fenerate the input elevation datasets from the result from the georender cropping pipeline.
+2. fetch the corresponding sql format dataset used for populating the relevation elevation fields of the given region of reconstruction.
 
 
-this pipeline depends on the [pipeline-point-cloud-infrastructure]()
-
-```
-docker compose run bacalhau_pipeline. 
-
-```
 
 ## Build instruction: 
 
-
-1. clone including the submodules : `git clone --recurse-submodules -j8 https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction.git`
-
-2. setup the enviornment variable (WEB3_STORAGE env variable) in both the docker-compose.yml and the run_bacalhau.sh script.
-
-
-3. in the dockerfile.bacalhau, add your corresponding mail in order to validate the web3-storage cli access to the session.
-
-4. Run the script in order to build local packages as containers 
-```
-docker compose up --build 
-```
-
-5. Run `./run_bacalhau.sh` with the parameters in cli (Xcoord, Ycoord, username, URI of shape file stored, filename of template, algorithm category of poisson reconstruction (0 for advanced and 1 for poisson surface reconstruction)) and then it'll generate:
-    - The resulting CID of the 3D tiles for the given region.
-    - Final reconstructed map in vector format.
-    - 3D visualization of the reconstructed map.
 
