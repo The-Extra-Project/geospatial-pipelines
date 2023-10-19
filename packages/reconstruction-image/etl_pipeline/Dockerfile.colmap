@@ -26,7 +26,10 @@ RUN apt-get update && apt-get install -y \
     qtbase5-dev \
     libqt5opengl5-dev \
     libcgal-dev \
-    libceres-dev
+    libceres-dev \
+    pip \
+    ffmpeg
+
 # headless servers
 RUN apt-get update && apt-get install -y \
     xvfb
@@ -36,10 +39,7 @@ RUN cd colmap && mkdir build && cd build && cmake .. -DCUDA_ENABLED=ON -DCMAKE_C
 RUN cd colmap/build && ninja && ninja install
 
 # additional python packages
-RUN apt-get update && apt-get install -y \
-    pip \
-    ffmpeg
-
+    
 RUN pip install \
     addict \
     k3d \
@@ -53,8 +53,4 @@ RUN pip install \
 FROM build as run
 WORKDIR /app
 
-
-COPY migrate.py ./app/migrate.py
-ADD eth_dataset /app/eth_dataset 
-
-CMD [ "/bin/bash", "-c" ]
+ENTRYPOINT [ "./run_colmap.sh" ]
