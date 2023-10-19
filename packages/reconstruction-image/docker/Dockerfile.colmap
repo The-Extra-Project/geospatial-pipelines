@@ -16,7 +16,6 @@ RUN apt-get update && apt-get install -y \
     libboost-system-dev \
     libboost-test-dev \
     libeigen3-dev \
-    p7zip-full \
     libflann-dev \
     libfreeimage-dev \
     libmetis-dev \
@@ -27,9 +26,9 @@ RUN apt-get update && apt-get install -y \
     qtbase5-dev \
     libqt5opengl5-dev \
     libcgal-dev \
-    libceres-dev
-# headless servers
-RUN apt-get update && apt-get install -y \
+    libceres-dev \
+    pip \
+    ffmpeg \   
     xvfb
 # Colmap
 RUN git clone https://github.com/colmap/colmap.git && cd colmap && git checkout 3.8
@@ -37,14 +36,8 @@ RUN cd colmap && mkdir build && cd build && cmake .. -DCUDA_ENABLED=ON -DCMAKE_C
 RUN cd colmap/build && ninja && ninja install
 
 
-
-
-
 # additional python packages
-RUN apt-get update && apt-get install -y \
-    pip \
-    ffmpeg
-
+    
 RUN pip install \
     addict \
     k3d \
@@ -54,11 +47,16 @@ RUN pip install \
     pyyaml \
     trimesh
 
+WORKDIR /usr/app/neuralangelo/
+
+COPY ../  .
+
+RUN chmod +x ./etl_pipeline/run_colmap.sh
+
+
 
 FROM build as run
-WORKDIR /app
+COPY --from=build /usr/app/neuralangelo/ /usr/app/neuralangelo/
+WORKDIR /usr/app/neuralangelo
 
-
-COPY ../etl_pipeline/migrate.py ./app/migrate.py
-
-CMD [ "/bin/bash", "-c" ]
+ENTRYPOINT [ "./etl_pipeline/run_colmap.sh" ]
