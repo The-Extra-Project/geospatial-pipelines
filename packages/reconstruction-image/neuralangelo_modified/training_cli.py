@@ -1,9 +1,9 @@
 """
 runs the command (either locally via CLI or via orchestrator) in order to train the model for the batch of images
 """
-
-import utils.gpu_jobs
-import utils.misc 
+import sys
+import os
+sys.append("../")
 import argparse
 from neuralangelo_modified.utils.config import Config, recursive_update, recursive_update_strict, DEBUG
 from neuralangelo_modified.utils.misc import init_cudnn, set_affinity, set_random_seed, init_logging, get_trainers

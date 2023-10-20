@@ -4,6 +4,9 @@ from contextlib import contextmanager
 import torch
 from neuralangelo_modified.utils.config import Model
 from torch.optim import lr_scheduler
+import ctypes
+
+
 def master_only(func):
     r"""Apply this function only to the master GPU."""
     @functools.wraps(func)
@@ -230,5 +233,20 @@ def broadcast_object_list(message, src=0):
         if dist.is_initialized():
             torch.distributed.broadcast_object_list(message, src=src)
     return message
+
+
+def init_dist(local_rank, backend='nccl', **kwargs):
+    r""" start training across multiple distributed instances if enabled
+    """
+    if dist.is_available():
+        if dist.is_initialized():
+            return torch.cuda.current_device()
+        torch.cuda.set_device(local_rank)
+        dist.init_process_group(backend=backend, init_method='env://', **kwargs)
+
+    _libcudart = ctypes.CDLL('libcudart.so')
+    pValue = ctypes.cast((ctypes.c_int * 1)(), ctypes.POINTER(ctypes.c_int))
+    _libcudart.cudaDeviceSetLimit(ctypes.c_int(0x05), ctypes.c_int(128))
+    _libcudart.cudaDeviceGetLimit(pValue, ctypes.c_int(0x05))
 
     
