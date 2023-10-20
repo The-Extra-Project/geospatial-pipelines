@@ -1,7 +1,17 @@
 name: image_reconstruction
 version: '3'
 services:
-  reconstruction:
+  data_preprocessing:
     build:
       context: ./packages/reconstruction-image
       dockerfile: docker/Dockerfile.colmap
+
+  neuralangelo_training:
+    build: 
+      context: ./packages/reconstruction-image
+      dockerfile: docker/Dockerfile.neuralangelo_training
+  
+  neuralangelo_extraction:
+    build: 
+      context: ./packages/reconstruction-image
+      dockerfile: docker/Dockerfile.surface_extraction
