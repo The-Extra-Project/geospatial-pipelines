@@ -1,7 +1,8 @@
 # docker build -f docker/Dockerfile-colmap -t chenhsuanlin/colmap:3.8 .
 # docker push chenhsuanlin/colmap:3.8
 
-FROM nvcr.io/nvidia/cuda:11.8.0-devel-ubuntu20.04 as build
+#FROM nvcr.io/nvidia/cuda:11.8.0-devel-ubuntu20.04 as build
+FROM nvcr.io/nvidia/cuda:11.8.0-devel-ubuntu20.04
 ARG DEBIAN_FRONTEND=noninteractive
 
 # colmap dependencies
@@ -16,7 +17,6 @@ RUN apt-get update && apt-get install -y \
     libboost-system-dev \
     libboost-test-dev \
     libeigen3-dev \
-    p7zip-full \
     libflann-dev \
     libfreeimage-dev \
     libmetis-dev \
@@ -27,7 +27,9 @@ RUN apt-get update && apt-get install -y \
     qtbase5-dev \
     libqt5opengl5-dev \
     libcgal-dev \
-    libceres-dev
+    libceres-dev \
+    pip \
+    ffmpeg
 # headless servers
 RUN apt-get update && apt-get install -y \
     xvfb
@@ -36,29 +38,21 @@ RUN git clone https://github.com/colmap/colmap.git && cd colmap && git checkout 
 RUN cd colmap && mkdir build && cd build && cmake .. -DCUDA_ENABLED=ON -DCMAKE_CUDA_ARCHITECTURES="70;72;75;80;86" -GNinja
 RUN cd colmap/build && ninja && ninja install
 
+## now getting the requirements for the neuralangelo model
+
+COPY ../neuralangelo_modified/requirements.txt  app/neuralangelo_modified/requirements.txt
+
+WORKDIR /app/neuralangelo_modified/
+
+RUN pip install -r requirements.txt
+
+## COPYing the remaining components
 
 
+COPY ../neuralangelo_modified/ /app/neuralangelo_modified/
 
 
-# additional python packages
-RUN apt-get update && apt-get install -y \
-    pip \
-    ffmpeg
+WORKDIR /app/neuralangelo_modified/scripts/
+RUN chmod 700 ./preprocess.sh
 
-RUN pip install \
-    addict \
-    k3d \
-    opencv-python-headless \
-    pillow \
-    plotly \
-    pyyaml \
-    trimesh
-
-
-FROM build as run
-WORKDIR /app
-
-
-COPY ../etl_pipeline/migrate.py ./app/migrate.py
-
-CMD [ "/bin/bash", "-c" ]
+ENTRYPOINT [ "./preprocess.sh" ]

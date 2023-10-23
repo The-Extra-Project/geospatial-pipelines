@@ -1,0 +1,4 @@
+fastapi
+bacalhau-sdk
+uvicorn
+python-dotenv

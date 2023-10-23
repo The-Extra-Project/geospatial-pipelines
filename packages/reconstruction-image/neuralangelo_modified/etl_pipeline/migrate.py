@@ -37,7 +37,7 @@ class Migration():
     
         
                
-    def transfer_data(self,folder_name, storage_type, **kwargs):
+    def transfer_data(self,folder_name, storage_type=None, **kwargs):
         if not os.path.exists(folder_name):
             os.mkdir(folder_name)
             os.chdir(folder_name)
@@ -84,7 +84,7 @@ class Migration():
     def parsing_config(dataset_name):
         """
         parses the associate files (calibration data) of the given dataset in order to merge and provide the colmap informatiopn from the ETH dataset.
-        dataset_name: this corresponds to the dataset information 
+        dataset_name: this corresponds to the dataset information (image alignment, image setup etc). 
         """
         
         path = os.path(os.getcwd() + "/eth_dataset/"+ dataset_name + "/dslr_calibration_undistorted")
@@ -99,5 +99,5 @@ class Migration():
 if __name__ == "__main__":
     migration = Migration('neuralangelo-dataset', bucket_name= "" , url='https://www.eth3d.net/data/multi_view_training_dslr_undistorted.7z', w3_storage_token='', region ='us-east-1')
     #migration.run_colmap_transformations('./eth_dataset')                  
-    migration.transfer_data('eth_dataset', 'AWS')               
+    migration.transfer_data('eth_dataset')               
         

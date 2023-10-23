@@ -1,7 +1,7 @@
-name: surface_reconstruction
+name: image_reconstruction
 version: '3'
 services:
   reconstruction:
     build:
       context: ./packages/reconstruction-image
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/Dockerfile.colmap
