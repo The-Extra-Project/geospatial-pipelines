@@ -1,4 +1,3 @@
-Pillow
 cloudpickle==0.4.0
 exifread==2.1.2
 flask==2.3.2
@@ -24,7 +23,6 @@ torchvision
 torchaudio
 scikit-image
 scikit-video
-scipy
 seaborn
 tensorboard
 termcolor
@@ -32,3 +30,8 @@ tqdm
 trimesh
 wandb
 pynvml
+addict 
+k3d 
+opencv-python-headless 
+plotly 
+pyyaml 
