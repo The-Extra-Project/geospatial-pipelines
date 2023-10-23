@@ -38,18 +38,16 @@ RUN cd colmap/build && ninja && ninja install
 
 ## now getting the requirements for the neuralangelo model
 
-COPY ../neuralangelo_modified/requirements.txt  app/neuralangelo_modified/requirements.txt
+WORKDIR /app/
+COPY ../neuralangelo_modified/requirements.txt ./neuralangelo_modified/requirements.txt
 
 WORKDIR /app/neuralangelo_modified/
 
 RUN pip install -r requirements.txt
 
-## COPYing the remaining components
+## COPYing the remaining implementation of 
 
-## updating the nvidia driver (avoid the dependency clash)
-
-COPY ../neuralangelo_modified/ /app/neuralangelo_modified/
-
+COPY ../neuralangelo_modified/ .
 
 WORKDIR /app/neuralangelo_modified/scripts/
 RUN chmod 700 ./preprocess.sh

@@ -1,20 +1,17 @@
 #!/bin/sh
-## $1 is the ETH-3D dataset path  (by default in reconstruction_image/)
+## $1 is the ETH-3D dataset path  (by default in ../datas/courtyard)
 
+# colmap feature_extractor \
+#     --database_path=${1}/dataset.db \ 
+#     --image_path=${1}/images/dslr_images \
+#     --ImageReader.camera_model=SIMPLE_RADIAL \
+#     --ImageReader.single_camera=true \
+#     --SiftExtraction.use_gpu=true \
+#     --SiftExtraction.num_threads=32
 
-## upload the ETH-3D dataset to the container (as hardcoded into the etl_pipeline/). this can be changed to accept custom dataset
-
-#python ../etl_pipeline/migrate.py  
-
-
-
-colmap feature_extractor \
-    --database_path=${1}/dataset.db \ 
-    --image_path=${1}/dslr_calibration_raw \
-    --ImageReader.camera_model=SIMPLE_RADIAL \
-    --ImageReader.single_camera=true \
-    --SiftExtraction.use_gpu=true \
-    --SiftExtraction.num_threads=32
+colmap automatic_reconstructor \
+    --workspace_path ${1} \
+    --image_path ${1}/images/dslr_images \
 
 # colmap sequential_matcher \
 #     --SiftMatching.use_gpu=true
