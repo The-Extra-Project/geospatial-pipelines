@@ -10,7 +10,6 @@ Pillow>=8.1.1
 pyproj>=1.9.5.1
 pytest==3.0.7
 python-dateutil>=2.7
-scipy>=1.10.0
 Sphinx==4.2.0
 six
 xmltodict==0.10.2
@@ -27,7 +26,6 @@ seaborn
 tensorboard
 termcolor
 tqdm
-trimesh
 wandb
 pynvml
 addict 
@@ -35,3 +33,5 @@ k3d
 opencv-python-headless 
 plotly 
 pyyaml 
+pymesh
+trimesh

@@ -29,9 +29,7 @@ RUN apt-get update && apt-get install -y \
     libcgal-dev \
     libceres-dev \
     pip \
-    ffmpeg
-# headless servers
-RUN apt-get update && apt-get install -y \
+    ffmpeg \   
     xvfb
 # Colmap
 RUN git clone https://github.com/colmap/colmap.git && cd colmap && git checkout 3.8
@@ -48,6 +46,7 @@ RUN pip install -r requirements.txt
 
 ## COPYing the remaining components
 
+## updating the nvidia driver (avoid the dependency clash)
 
 COPY ../neuralangelo_modified/ /app/neuralangelo_modified/
 

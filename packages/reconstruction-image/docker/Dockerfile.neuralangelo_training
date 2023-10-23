@@ -1,0 +1,52 @@
+FROM nvcr.io/nvidia/pytorch:23.04-py3 as build
+ARG DEBIAN_FRONTEND=noninteractive
+WORKDIR /
+# Install basics
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    bzip2 \
+    ca-certificates \
+    cmake \
+    curl \
+    ffmpeg \
+    g++ \
+    git \
+    libx264-dev \
+    tmux \
+    wget
+
+
+RUN pip install --upgrade pip \
+pip install --upgrade \
+    flake8 \
+    pre-commit
+
+
+ENV EXPERIMENT=images_example
+ENV GROUP=extra_project
+ENV NAME="test_run"
+ENV GPUS=1
+
+WORKDIR /usr/app/reconstruction_image
+
+COPY ./neuralangelo_modified neuralangelo_modified
+
+RUN pip install -r ./neuralangelo_modified/requirements.txt
+
+# Install base Python libraries needed for all the other packages  
+COPY ../neuralangelo_modified/requirements.txt requirements.txt
+ARG FORCE_CUDA=1
+ARG TCNN_CUDA_ARCHITECTURES=70,72,75,80,86
+
+FROM build as run
+
+COPY --from=build /usr/app/reconstruction_image/ /usr/app/reconstruction_image/
+
+WORKDIR /usr/app/reconstruction_image/neuralangelo_modified/
+
+RUN torchrun --nproc_per_node=${GPUS} training_cli.py \
+    --logdir=logs/${GROUP}/${NAME} \
+    --config=${CONFIG} \
+    --show_pbar
+
+

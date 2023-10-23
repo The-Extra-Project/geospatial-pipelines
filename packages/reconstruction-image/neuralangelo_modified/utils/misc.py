@@ -10,9 +10,9 @@ import torch
 import torch.nn.functional as F
 import wandb
 import numpy as np
-
+import mcubes 
 from neuralangelo_modified.utils.gpu_jobs import get_rank, is_master, broadcast_object_list
-from neuralangelo_modified.utils.config import Device, WrappedModel
+from neuralangelo_modified.utils.config import Device, WrappedModel, LatticeGrid, get_lattice_grid_loader
 from neuralangelo_modified.dataset.sampler import DistributedSamplerPreemptable
 from neuralangelo_modified.utils.misc import WrappedModel,ModelAverage
 from neuralangelo_modified.dataset.base import MultiEpochsDatasetLoader
@@ -751,8 +751,6 @@ def cal_model_parameters(model: torch.nn.Module):
     '''
     Args:
     model (obj): object identifying the model which is to be trained
-    
-    
     '''
     init_params = 0
     for p in model.parameters():
@@ -795,6 +793,78 @@ def wrap_model(cfg, model):
     else:
         model = WrappedModel(model)
    
+   
+
+## functions for doing isometric extraction of the features.
+@torch.no_grad()
+def extract_mesh(sdf_func, bounds, intv, block_res=64, texture_fn= None, filter_lcc=False):
+    """
+    fetches the mesh details from the given regenerated images function given the corresponding neural differential function
+    sdf_func: 
+    
+    
+    """
+    lattice_grid = LatticeGrid(bounds, intv=intv, block_res=block_res)
+    data_loader = get_lattice_grid_loader(lattice_grid)
+    mesh_blocks=[]
+    for it, data in enumerate(data_loader):
+        xyz = data["xyz"][0]
+        xyz_cuda = xyz.cuda()
+        sdf_cuda = sdf_func(xyz_cuda)[..., 0]
+        sdf = sdf_cuda.cpu()
+        mesh = marching_cubes_algorithm(sdf.numpy(), xyz.numpy(), intv, texture_fn, filter_lcc)
+        mesh_blocks.append(mesh)
 
     
+import trimesh
+
+def filter_points_outside_bounding_sphere(old_mesh):
     
+    mask = np.linalg.norm(old_mesh.vertices, axis=-1) < 1.0
+    if np.any(mask):
+        indices = np.ones(len(old_mesh.vertices), dtype=int) * -1
+        indices[mask] = np.arange(mask.sum())
+        faces_mask = mask[old_mesh.faces[:, 0]] & mask[old_mesh.faces[:, 1]] & mask[old_mesh.faces[:, 2]]
+        new_faces = indices[old_mesh.faces[faces_mask]]
+        new_vertices = old_mesh.vertices[mask]
+        new_colors = old_mesh.visual.vertex_colors[mask]
+        new_mesh = trimesh.Trimesh(new_vertices, new_faces, vertex_colors=new_colors)
+    else:
+        new_mesh = trimesh.Trimesh()
+    return new_mesh
+    
+import mesh
+
+def filter_largest_cc():
+    r""" 
+    
+    """
+    components = mesh.split()
+    areas = np.array([c.area for c in components], dtype=float)
+
+    if len(areas) > 0 and mesh.vertices.shape[0] > 0:
+        new_mesh = components[areas.argmax()]
+    else:
+        new_mesh = trimesh.Trimesh()
+    return new_mesh
+
+    
+
+
+def marching_cubes_algorithm(sdf, xyz, intv, texture_func, filter_lcc):
+        r""" implementation of the marching cubes algorithm that gives the polygon mesh from the iso-surface    
+        """
+        V, F = mcubes.marching_cubes(sdf, 0.)
+        if V.shape[0] > 0:
+            V = V * intv + xyz[0, 0, 0]
+            if texture_func is not None:
+                C = texture_func(V)
+                mesh = trimesh.Trimesh(V, F, vertex_colors=C)
+            else:
+                mesh = trimesh.Trimesh(V, F)
+            mesh = filter_points_outside_bounding_sphere(mesh)
+            mesh = filter_largest_cc(mesh) if filter_lcc else mesh
+        else:
+            mesh = trimesh.Trimesh()
+        return mesh
+

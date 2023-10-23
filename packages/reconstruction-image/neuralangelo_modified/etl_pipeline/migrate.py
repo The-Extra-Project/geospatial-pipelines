@@ -12,7 +12,7 @@ import tqdm
 import os
 import w3storage
 
-class Migration():
+class Preprocess():
     
     client: boto3.client
     ## ref from the stackoverflow (to log the process in the subprocess): 
@@ -23,29 +23,43 @@ class Migration():
     
     def __init__(self, bucket_name,url,w3_storage_token,region):
         self.client = boto3.client('s3', region_name=region)
-        self.bucket_name = bucket_name  #(if the object folder is already created, the accessible bucketname for the given user)
+        self.bucket_name = bucket_name  
         self.url = url
         self.w3 = w3storage.API(token=w3_storage_token)
     
     
-    def get_size(self,folder_name):
+    def get_size_s3_storage(self,folder_name):
         total_size =0
         for _file in self.client.list_objects(
             Bucket=self.bucket_name, Prefix=folder_name)["Contents"]:
             total_size += _file["Size"]
             return total_size
     
+    def get_size(self,folder_name):
+        """
+        folder_name: its the relative path of the folder where the images are stored.
+        """
+        total_size = 0
+        for _file in os.listdir(folder_name):
+            total_size += os.path.getsize(os.path.join(folder_name, _file))
+        return total_size
+     
+    def transfer_data(self,folder_name, storage_type, **kwargs):
+        """
+        this allows user to transfer the dataset from remote storage to either local-storage / S3 / ipfs.
         
-               
-    def transfer_data(self,folder_name, storage_type=None, **kwargs):
+        folder_name: its the relative path of the folder where the images are stored.
+        storage_type: one of the identifiers: AWS / local / ipfs.
+        """
         if not os.path.exists(folder_name):
             os.mkdir(folder_name)
             os.chdir(folder_name)
             dataset_download = requests.get(self.url, stream=True)
             ## download the dataset from curl with specific folder for the output
-            check_call(['curl', self.url, '-o', 'neuralangelo_dataset.7z'])
+            process = check_call(['curl', self.url, '-o', 'neuralangelo_dataset.7z'])
+  
         ## extract the dataset from the 7z file
-            with py7zr.SevenZipFile('neuralangelo_dataset.7z', mode='r') as z:
+            with py7zr.SevenZipFile( folder_name+'.7z', mode='r') as z:
                 z.extractall()
         
             os.chdir('../')
@@ -71,7 +85,7 @@ class Migration():
     def run_colmap_transformations(self,directory):
         """
         Runs the colmap transformations on the given dataset of the images.
-        directory: is the relative path of the dataset directory (given from the output dataset) which is also the project path.
+        directory: Its the relative path of the dataset directory (given from the output dataset) which is also the project path.
         
         """   
        
@@ -80,24 +94,11 @@ class Migration():
             self.log_subprocess_output(self.process.stdout)
         exitcode = self.process.wait()
         print('exit code:'+ exitcode)
-        
-    def parsing_config(dataset_name):
-        """
-        parses the associate files (calibration data) of the given dataset in order to merge and provide the colmap informatiopn from the ETH dataset.
-        dataset_name: this corresponds to the dataset information (image alignment, image setup etc). 
-        """
-        
-        path = os.path(os.getcwd() + "/eth_dataset/"+ dataset_name + "/dslr_calibration_undistorted")
-
-        # with open(path + "/cameras.txt", "r") as f:
-        #     lines = f.readlines()
-            
-
-
+  
         
         
 if __name__ == "__main__":
-    migration = Migration('neuralangelo-dataset', bucket_name= "" , url='https://www.eth3d.net/data/multi_view_training_dslr_undistorted.7z', w3_storage_token='', region ='us-east-1')
+    migration = Preprocess(bucket_name= "" , url='https://www.eth3d.net/data/multi_view_training_dslr_undistorted.7z', w3_storage_token='', region ='us-east-1')
     #migration.run_colmap_transformations('./eth_dataset')                  
     migration.transfer_data('eth_dataset')               
         

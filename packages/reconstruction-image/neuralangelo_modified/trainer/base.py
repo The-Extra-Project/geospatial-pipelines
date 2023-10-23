@@ -92,12 +92,6 @@ class BaseTrainer(object):
             self.eval_data_loader = get_val_dataloader(cfg, seed=seed)
         elif split == "test":
             self.eval_data_loader = get_test_dataloader(cfg)
-
-
-
-
-
-
      
     def setup_model(self, cfg, seed=0):
         r""" initialize the training cluster (either on the bacalhau cluster or on the centralised one) in start they've similar number of network weights.
