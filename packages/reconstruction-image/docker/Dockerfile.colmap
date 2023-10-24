@@ -29,12 +29,13 @@ RUN apt-get update && apt-get install -y \
     libceres-dev \
     pip \
     ffmpeg \   
-    xvfb
+    xvfb \
+    wget 
+
 # Colmap
 RUN git clone https://github.com/colmap/colmap.git && cd colmap && git checkout 3.8
 RUN cd colmap && mkdir build && cd build && cmake .. -DCUDA_ENABLED=ON -DCMAKE_CUDA_ARCHITECTURES="70;72;75;80;86" -GNinja
 RUN cd colmap/build && ninja && ninja install
-
 
 ## updating the nvidia driver (avoid the dependency clash)
 
@@ -61,14 +62,22 @@ RUN apt-get install -y \
 # RUN distribution=$(. /etc/os-release;echo $ID$VERSION_ID) && curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add - && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
 
 
-## also got the issue regarding the dependency on compilation with gcc10
 
 RUN  apt install -y  gcc-10 g++-10 
 ENV CC=/usr/bin/gcc-10 
 ENV  CXX=/usr/bin/g++-10 
 ENV CUDAHOSTCXX=/usr/bin/g++-10 
 
+
 WORKDIR /usr/app/neuralangelo/
+
+## downloading the dataset temporarily, but eventually this is to be done by the etl_pipeline
+
+RUN mkdir dataset && \ 
+cd dataset/ && \
+wget  https://www.eth3d.net/data/courtyard_dslr_undistorted.7z && \
+cd ../
+
 
 COPY ../  .
 

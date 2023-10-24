@@ -1,6 +1,7 @@
-# pipeline-point-cloud-recostruction
+# Pipeline-point-cloud-recostruction
 
 **E2E pipeline for reconstructing the given surface by using photogrammetry and the state of the art rendering terchniques [like 3D gaussian splatting] by implementing distributed way (i.e by aligning the combination of the various users in the overall viewpoint of the user)** 
+
 <p align="left">
     <a href="https://github.com/https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction.git/LICENSE.md" alt="License">
         <img src="https://img.shields.io/badge/license-MIT-green" />
@@ -27,9 +28,9 @@
 1. clone including the submodules : `git clone --recurse-submodules -j8 https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction.git`
 
 
-4. Run the script in order to build local packages as containers 
+2. Run the  preprocessing script in order to create the initial reconstruction pipeline 
 ```
-docker compose up --build 
+docker compose build reconstruction
 ```
 
 ## Credits:
