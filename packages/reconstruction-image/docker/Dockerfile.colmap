@@ -2,8 +2,11 @@
 # docker push chenhsuanlin/colmap:3.8
 
 #FROM nvcr.io/nvidia/cuda:11.8.0-devel-ubuntu20.04 as build
-FROM nvcr.io/nvidia/cuda:11.8.0-devel-ubuntu20.04
+FROM nvidia/cuda:12.2.0-devel-ubuntu22.04
 ARG DEBIAN_FRONTEND=noninteractive
+ARG CUDA_ARCHITECTURES=native
+ARG COLMAP_GIT_COMMIT=main
+ENV QT_XCB_GL_INTEGRATION=xcb_egl
 
 # colmap dependencies
 RUN apt-get update && apt-get install -y \
@@ -32,9 +35,14 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \   
     xvfb
 # Colmap
-RUN git clone https://github.com/colmap/colmap.git && cd colmap && git checkout 3.8
-RUN cd colmap && mkdir build && cd build && cmake .. -DCUDA_ENABLED=ON -DCMAKE_CUDA_ARCHITECTURES="70;72;75;80;86" -GNinja
-RUN cd colmap/build && ninja && ninja install
+
+RUN git clone https://github.com/colmap/colmap.git && cd colmap \
+git fetch https://github.com/colmap/colmap.git main   && \
+git checkout main && \
+mkdir build && cd build && cmake .. -GNinja -DCUDA_ENABLED=ON -DCMAKE_CUDA_ARCHITECTURES=${CUDA_ARCHITECTURES} && \
+ninja && ninja install \
+cd .. && rm -rf colmap
+
 
 ## now getting the requirements for the neuralangelo model
 

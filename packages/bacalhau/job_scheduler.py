@@ -1,9 +1,11 @@
+"""
+referenced implementation from daggle-xyz: 
+
+it consist of taking user requests in REST format and then scheduling the compute from the dockerhub based instance to the user account.
+"""
 
 from fastapi import APIRouter, FastAPI, Request, Response, status
-from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
-
-
 from bacalhau_sdk.api import submit, results, states
 from bacalhau_sdk.config import get_client_id
 from bacalhau_apiclient.models.storage_spec import StorageSpec
@@ -12,6 +14,7 @@ from bacalhau_apiclient.models.job_spec_language import JobSpecLanguage
 from bacalhau_apiclient.models.job_spec_docker import JobSpecDocker
 from bacalhau_apiclient.models.publisher_spec import PublisherSpec
 from bacalhau_apiclient.models.deal import Deal
+
 
 
 app = FastAPI(debug=True)
