@@ -94,24 +94,11 @@ class Preprocess():
             self.log_subprocess_output(self.process.stdout)
         exitcode = self.process.wait()
         print('exit code:'+ exitcode)
-        
-    # def parsing_config(dataset_name):
-    #     """
-    #     parses the associate files (calibration data) of the given dataset in order to merge and provide the colmap informatiopn from the ETH dataset.
-    #     dataset_name: this corresponds to the dataset information 
-    #     """
-        
-    #     path = os.path(os.getcwd() + "/eth_dataset/"+ dataset_name + "/dslr_calibration_undistorted")
-
-        # with open(path + "/cameras.txt", "r") as f:
-        #     lines = f.readlines()
-            
-
-
+  
         
         
 if __name__ == "__main__":
     migration = Preprocess(bucket_name= "" , url='https://www.eth3d.net/data/multi_view_training_dslr_undistorted.7z', w3_storage_token='', region ='us-east-1')
     #migration.run_colmap_transformations('./eth_dataset')                  
-    migration.transfer_data('eth_dataset', 'AWS')               
+    migration.transfer_data('eth_dataset')               
         

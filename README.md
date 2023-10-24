@@ -1,7 +1,6 @@
 # Pipeline-point-cloud-recostruction
 
-**E2E pipeline for reconstructing the given surface by using photogrammetry and the state of the art rendering terchniques [like 3D gaussian splatting] by implementing distributed way (i.e by aligning the combination of the various users in the overall viewpoint of the user)** 
-
+**E2E pipeline for reconstructing the given 3D area using neuralangelo in distributed way (i.e by aligning the combination of the various users in the overall viewpoint of the user)** 
 <p align="left">
     <a href="https://github.com/https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction.git/LICENSE.md" alt="License">
         <img src="https://img.shields.io/badge/license-MIT-green" />
@@ -18,9 +17,9 @@
 </p>
 
 ## packages / components involved: 
-- [reconstruction-image](./packages/reconstruction-image/): 
+- [reconstruction-image](./packages/reconstruction-image/):
+    this implements the modified version of neuralangelo which is run on top of bacalhau node for every image dataset.
 
--  [slam](./packages/surface_reconstruction/): 
 
 ## Build instruction: 
 

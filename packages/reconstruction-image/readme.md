@@ -4,5 +4,3 @@ This package consist of the initial preprocessing steps for feeding images then 
     - object detection.
     - object and surrounding plane reconstruction.
 
-which is then stored into the overall algorithm implemented using SLAM techniques.
-

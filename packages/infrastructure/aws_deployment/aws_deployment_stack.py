@@ -30,13 +30,7 @@ class AwsDeploymentStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        ## now you can use the following possiblities 
-        ## 1. defining a new VPC by yourselves (ec2.Vpc)
-        ##2. or deploying from the existing VPC's using ec2.Vpc.from_lookup()
-        ## 3. adding the neuralangelo_modified conntainer in the ECR and creating task for running the training jobs
-               
+       
         self.vpc = ec2.Vpc(self, "image-reconstruction-vpc", max_azs=1)
 
-        
-        print(function.connections)
-    
+            

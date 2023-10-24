@@ -1,8 +1,12 @@
 # docker build -f docker/Dockerfile-colmap -t chenhsuanlin/colmap:3.8 .
 # docker push chenhsuanlin/colmap:3.8
 
-FROM nvcr.io/nvidia/cuda:11.8.0-devel-ubuntu20.04 as build
+#FROM nvcr.io/nvidia/cuda:11.8.0-devel-ubuntu20.04 as build
+FROM nvidia/cuda:12.2.0-devel-ubuntu22.04 as build
 ARG DEBIAN_FRONTEND=noninteractive
+ARG CUDA_ARCHITECTURES=native
+ARG COLMAP_GIT_COMMIT=main
+ENV QT_XCB_GL_INTEGRATION=xcb_egl
 
 # colmap dependencies
 RUN apt-get update && apt-get install -y \
@@ -29,63 +33,35 @@ RUN apt-get update && apt-get install -y \
     libceres-dev \
     pip \
     ffmpeg \   
-    xvfb \
-    wget 
-
+    xvfb
 # Colmap
-RUN git clone https://github.com/colmap/colmap.git && cd colmap && git checkout 3.8
-RUN cd colmap && mkdir build && cd build && cmake .. -DCUDA_ENABLED=ON -DCMAKE_CUDA_ARCHITECTURES="70;72;75;80;86" -GNinja
-RUN cd colmap/build && ninja && ninja install
-
-## updating the nvidia driver (avoid the dependency clash)
-
-RUN  apt install -y nvidia-driver-535 nvidia-dkms-535 
-
-# additional python packages
-    
-RUN pip install \
-    addict \
-    k3d \
-    opencv-python-headless \
-    pillow \
-    plotly \
-    pyyaml \
-    trimesh
-
-## installing ubuntu-ami traditional CUDA support
-
-RUN apt-get install -y \
-    nvidia-cuda-toolkit \
-    nvidia-cuda-toolkit-gcc
-
-# RUN git clone https://gitlab.com/nvidia/container-images/cuda.git
-# RUN distribution=$(. /etc/os-release;echo $ID$VERSION_ID) && curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add - && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+RUN git clone https://github.com/colmap/colmap.git && cd colmap \
+git fetch https://github.com/colmap/colmap.git main   && \
+git checkout main && \
+mkdir build && cd build && cmake .. -GNinja -DCUDA_ENABLED=ON -DCMAKE_CUDA_ARCHITECTURES=${CUDA_ARCHITECTURES} && \
+ninja && ninja install \
+cd .. && rm -rf colmap
 
 
+## now getting the requirements for the neuralangelo model
 
-RUN  apt install -y  gcc-10 g++-10 
-ENV CC=/usr/bin/gcc-10 
-ENV  CXX=/usr/bin/g++-10 
-ENV CUDAHOSTCXX=/usr/bin/g++-10 
+WORKDIR /app/
+COPY ../neuralangelo_modified/requirements.txt ./neuralangelo_modified/requirements.txt
 
+WORKDIR /app/neuralangelo_modified/
 
-WORKDIR /usr/app/neuralangelo/
+RUN pip install -r requirements.txt
 
-## downloading the dataset temporarily, but eventually this is to be done by the etl_pipeline
+## COPYing the remaining implementation of 
 
-RUN mkdir dataset && \ 
-cd dataset/ && \
-wget  https://www.eth3d.net/data/courtyard_dslr_undistorted.7z && \
-cd ../
+COPY ../neuralangelo_modified/ .
 
-
-COPY ../  .
-
-RUN chmod +x ./etl_pipeline/run_colmap.sh
 
 FROM build as run
 
-COPY --from=build /usr/app/neuralangelo/ /usr/app/neuralangelo/
-WORKDIR /usr/app/neuralangelo
+COPY --from=build /app/ /app/
 
-ENTRYPOINT [ "./etl_pipeline/run_colmap.sh" ]
+WORKDIR /app/neuralangelo_modified/scripts/
+RUN chmod 700 ./preprocess.sh
+
+ENTRYPOINT [ "./preprocess.sh" ]
