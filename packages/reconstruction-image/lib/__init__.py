@@ -1,1 +1,0 @@
-from colmap.scripts.python import *
