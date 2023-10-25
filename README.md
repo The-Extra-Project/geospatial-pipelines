@@ -18,7 +18,10 @@
 
 ## packages / components involved: 
 - [reconstruction-image](./packages/reconstruction-image/):
-    this implements the modified version of neuralangelo which is run on top of bacalhau node for every image dataset.
+    this implements the modified version of neuralangelo which is run on top of bacalhau node for every image dataset. its implemented in 3 steps 
+        - Data_preprocessing step: this will run colmap's image preprocesisng pipeline in order to take the images from a dataset (or eventually from the given dataset of the ) 
+            - The dataset to be evaluated for the training purposes are stored at neuralangelo_modified/dataset/
+            - Define the path as a parameter to the image repository in order to run the preprocessing pipeline.
 
 
 ## Build instruction: 

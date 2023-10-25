@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/pytorch:23.04-py3 as build
+FROM nvidia/cuda:12.2.0-devel-ubuntu22.04 as build
 ARG DEBIAN_FRONTEND=noninteractive
 WORKDIR /
 # Install basics
@@ -21,7 +21,6 @@ pip install --upgrade \
     flake8 \
     pre-commit
 
-
 ENV EXPERIMENT=images_example
 ENV GROUP=extra_project
 ENV NAME="test_run"
@@ -36,7 +35,7 @@ RUN pip install -r ./neuralangelo_modified/requirements.txt
 # Install base Python libraries needed for all the other packages  
 COPY ../neuralangelo_modified/requirements.txt requirements.txt
 ARG FORCE_CUDA=1
-ARG TCNN_CUDA_ARCHITECTURES=70,72,75,80,86
+ARG TCNN_CUDA_ARCHITECTURES=86
 
 FROM build as run
 
@@ -48,5 +47,4 @@ RUN torchrun --nproc_per_node=${GPUS} training_cli.py \
     --logdir=logs/${GROUP}/${NAME} \
     --config=${CONFIG} \
     --show_pbar
-
 

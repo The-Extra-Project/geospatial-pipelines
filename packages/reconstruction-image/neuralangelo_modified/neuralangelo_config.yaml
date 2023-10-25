@@ -88,9 +88,9 @@ optim:
         step_size: 9999999999
         gamma: 1
 
-# Data
+# Data extraction.
 data:
-    name: dummy
+    name: eth_slam_images
     type: imaginaire.datasets.images
     use_multi_epoch_loader: False
     num_workers: 0

@@ -642,7 +642,18 @@ def slice_tensor(data, start, end):
     else:
         return data    
     
-
+def extract_texture(xyz, neural_rgb, neural_sdf, appear_embed):
+    num_samples, _ = xyz.shape
+    xyz_cuda = torch.from_numpy(xyz).float().cuda()[None, None]
+    sdfs, feats = neural_sdf(xyz_cuda)
+    gradients, _ = neural_sdf.compute_gradients(xyz_cuda, training=False, sdf=sdfs)
+    normals = F.normalize(gradients, dim=-1)
+    if appear_embed is not None:
+        feat_dim = appear_embed.embedding_dim  # [1,1,N,C]
+        app = torch.zeros([1, 1, num_samples, feat_dim], device=sdfs.device)  # TODO: hard-coded to zero. better way?
+    else:
+        app = None
+    rgbs = neural_rgb.forward(xyz_cuda, normals, -normals, feats, app=app)  # [1,1,N,3]
 
 ## functions for initializing the weights
 
@@ -652,7 +663,6 @@ def weights_init(init_type: str, gain, bias=None):
     init_type(str): defines the type of initialization techniques
     gain:  corresponding value for the initialization technique
     bias(Object): defines the bias value, by default its None that defines for the initialization.
-    
     returns:        
     (obj): init function to be applied
     """
@@ -836,7 +846,7 @@ def filter_points_outside_bounding_sphere(old_mesh):
 import mesh
 
 def filter_largest_cc():
-    r""" 
+    r""" it filters the largest mesh that has the availablity of the image information  
     
     """
     components = mesh.split()
@@ -847,9 +857,6 @@ def filter_largest_cc():
     else:
         new_mesh = trimesh.Trimesh()
     return new_mesh
-
-    
-
 
 def marching_cubes_algorithm(sdf, xyz, intv, texture_func, filter_lcc):
         r""" implementation of the marching cubes algorithm that gives the polygon mesh from the iso-surface    
