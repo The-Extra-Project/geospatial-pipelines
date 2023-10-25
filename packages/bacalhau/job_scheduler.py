@@ -14,7 +14,7 @@ from bacalhau_apiclient.models.job_spec_language import JobSpecLanguage
 from bacalhau_apiclient.models.job_spec_docker import JobSpecDocker
 from bacalhau_apiclient.models.publisher_spec import PublisherSpec
 from bacalhau_apiclient.models.deal import Deal
-
+import uvicorn
 
 
 app = FastAPI(debug=True)
@@ -27,10 +27,7 @@ router = APIRouter(
     responses={404: {"message": "Not found"}},
 )
 
-
 app.include_router(router)
-
-
 
 @router.post("/neuralangelo/submit")
 async def schedule_job(request: Request, response: Response):
@@ -89,3 +86,7 @@ async def get_job(job_id: str, response: Response):
 @app.get("/neuralangelo")
 def base_scheduler():
     return {"connection to bacalhau instance complete"}
+
+
+if __name__ == "__main__":
+    uvicorn.run(app=app,host="127.0.0.1", port=80)
