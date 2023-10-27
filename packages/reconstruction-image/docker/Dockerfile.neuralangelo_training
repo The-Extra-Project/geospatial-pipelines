@@ -43,6 +43,11 @@ COPY --from=build /usr/app/reconstruction_image/ /usr/app/reconstruction_image/
 
 WORKDIR /usr/app/reconstruction_image/neuralangelo_modified/
 
+ARG GROUP="ETH_group" 
+ARG NAME="ETH" 
+ENV CHECKPOINT=logs/${GROUP}/${NAME}/${1}.pt
+
+
 RUN torchrun --nproc_per_node=${GPUS} training_cli.py \
     --logdir=logs/${GROUP}/${NAME} \
     --config=${CONFIG} \

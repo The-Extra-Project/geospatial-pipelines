@@ -1,2 +1,26 @@
 FROM nvcr.io/nvidia/pytorch:23.04-py3 as build
 
+## Input params: $1 is the stored trained dataset with the training point.
+## this is the name of the label assigned during the training process.
+
+ARG GROUP="ETH_group" 
+ARG NAME="ETH" 
+ARG CHECKPOINT=logs/${GROUP}/${NAME}/${1}.pt
+ARG CONFIG=logs/${GROUP}/${NAME}/config.yaml
+ARG RESOLUTION=2048
+ARG BLOCK_REQ=128
+
+WORKDIR /app/
+
+COPY ../neuralangelo_modified/ ./neuralangelo_modified/ 
+
+FROM build as run
+
+COPY --from=build /app/neuralangelo_modified/ /app/neuralangelo_modified/
+
+RUN torchrun --nproc_per_node=${GPUS} projects/neuralangelo/scripts/extract_mesh.py \
+    --config=${CONFIG} \
+    --checkpoint=${CHECKPOINT} \
+    --output_file=${OUTPUT_MESH} \
+    --resolution=${RESOLUTION} \
+    --block_res=${BLOCK_RES}

@@ -39,11 +39,11 @@ RUN git clone https://github.com/colmap/colmap.git && cd colmap \
 git fetch https://github.com/colmap/colmap.git main   && \
 git checkout main && \
 mkdir build && cd build && cmake .. -GNinja -DCUDA_ENABLED=ON -DCMAKE_CUDA_ARCHITECTURES=${CUDA_ARCHITECTURES} && \
-ninja && ninja install \
-cd .. && rm -rf colmap
-
+ninja  && ninja install \
+&& rm -rf colmap
 
 ## now getting the requirements for the neuralangelo model
+
 
 WORKDIR /app/
 COPY ../neuralangelo_modified/requirements.txt ./neuralangelo_modified/requirements.txt
