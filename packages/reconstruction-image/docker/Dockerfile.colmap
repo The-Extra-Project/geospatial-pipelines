@@ -61,7 +61,8 @@ FROM build as run
 
 COPY --from=build /app/ /app/
 
-WORKDIR /app/neuralangelo_modified/scripts/
-RUN chmod 700 ./preprocess.sh
+WORKDIR /
 
-ENTRYPOINT [ "./preprocess.sh" ]
+RUN chmod 700 ./app/neuralangelo_modified/scripts/preprocess.sh
+
+ENTRYPOINT [ "./app/neuralangelo_modified/scripts/preprocess.sh" ]

@@ -45,7 +45,8 @@ WORKDIR /usr/app/reconstruction_image/neuralangelo_modified/
 
 ARG GROUP="ETH_group" 
 ARG NAME="ETH" 
-ENV CHECKPOINT=logs/${GROUP}/${NAME}/${1}.pt
+ARG CHECKPOINT_FILE="TEST"
+ENV CHECKPOINT=logs/${GROUP}/${NAME}/${CHECKPOINT_FILE}.pt
 
 
 RUN torchrun --nproc_per_node=${GPUS} training_cli.py \
