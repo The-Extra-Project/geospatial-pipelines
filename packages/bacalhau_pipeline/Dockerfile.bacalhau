@@ -47,8 +47,7 @@ RUN w3 authorize $EMAIL
 #     sudo pip3 install --upgrade
 
 RUN echo bacalhau version
-## refernece the build from ghcr.io/bacalhau-project/bacalhau:latest
-#CMD [ "/bin/sh", "-c", "mkdir /app" ] 
+ 
 
 COPY ./run_bacalhau.sh /app/bacalhau/run_bacalhau.sh 
 
