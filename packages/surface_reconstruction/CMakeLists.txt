@@ -11,9 +11,7 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 set(DEFAULT_FEM_DEGREE, 1)
 set(DEFAULT_FEM_BOUNDARY, "Neumann" )
 
-project( pipeline_pointcloud )
-
-
+project( surface_reconstruction )
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -41,7 +39,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/FindlibJPEG.cmake)
 #find_package(libJPEG)
 #target_link_libraries(surface_reconstruction libJPEG )
 #target_link_libraries( poisson_recon libJPEG)
-
+set(CMAKE_BUILD_TYPE "Release")
 message(STATUS "CGAL_FOUND : ${CGAL_FOUND}")
 message(STATUS "CGAL_LIBRARIES : ${CGAL_LIBRARIES}")
 message(STATUS "CGAL_INCLUDE_DIRS : ${CGAL_INCLUDE_DIRS}")
@@ -60,7 +58,6 @@ endif()
 find_package(Eigen3 3.1.0 QUIET)
 include(CGAL_Eigen3_support)
 
-
 set(surface_reconstruction_SOURCE_DIR "." )
 
 
@@ -76,22 +73,31 @@ include_directories(${surface_reconstruction_SOURCE_DIR}/lib/LAStools/)
 include_directories(${surface_reconstruction_SOURCE_DIR}/lib/LAStools/LASlib/inc/)
 include_directories(${surface_reconstruction_SOURCE_DIR}/lib/LAStools/LASzip/src/)
 include_directories(${surface_reconstruction_SOURCE_DIR}/build/)
+include_directories(${CGAL_INCLUDE_DIRS})
+include(${CGAL_USE_FILE})
+
+find_package(CGAL REQUIRED COMPONENTS scanline_orient_normals)
+
+if (CGAL_FOUND)
+  include_directories(${CGAL_INCLUDE_DIRS})
+  message(STATUS "CGAL SCANLINE_ORIent_normals header found")
+else()
+  message(STATUS "CGAL scaline package not found")
+endif()
+
 
 
 
 if(TARGET CGAL::Eigen3_support)
 
 # ############################
-create_single_source_cgal_program("normal_and_reconstruction.cpp")
-
 add_executable( normal_and_reconstruction  ${surface_reconstruction_SOURCE_DIR}/src/normal_and_reconstruction.cpp)
 target_link_libraries(normal_and_reconstruction ${Boost_LIBRARIES})
 target_link_libraries(normal_and_reconstruction CGAL::CGAL ${CGAL_LIBRARIES})
 target_link_libraries(normal_and_reconstruction CGAL::CGAL ${LAS_LIBRARIES})
-#target_link_libraries(normal_and_reconstruction CGAL::CGAL ${Eigen3_LIBRARIES})
-#target_link_libraries(normal_and_reconstruction PUBLIC CGAL::Eigen3_support)
+target_link_libraries(normal_and_reconstruction CGAL::CGAL ${Eigen3_LIBRARIES})
 
 
 else()
-  message("NOTICE: The examples require Eigen 3.1 (or greater) will not be compiled.")
+  message("NOTICE: The examples require Eigen 3.1 (or greater).")
 endif()

@@ -1,6 +1,5 @@
-# pipeline-point-cloud-recostruction
+# Geospatial-pipeline reconstruction
 
-**E2E pipeline to analyze the raw lidar 3D point cloud data and then convert to finished polygon file for visualization** 
 <p align="left">
     <a href="https://github.com/https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction.git/LICENSE.md" alt="License">
         <img src="https://img.shields.io/badge/license-MIT-green" />
@@ -16,8 +15,7 @@
     </a>
 </p>
 
-Running geospatial algorithms pipeline on the raw shape file in order to generate the corresponding reconstructed 3D polygon mesh of the given region given the coordinates by the user. It runs the pipeline service on the cloud that  runs series of computation algorithms on the pipeline (as defined in the [packages](./packages/) section) which are executed on bacalhau.
-
+Running geospatial algorithms across various input raw  input datasets datasets (point cloud) in order to generate the output vizualization as polygon meshes.
 
 ## packages / components involved: 
 - [georender](./packages/georender/): is the first step in reconstruction. it takes user input for the given region to be reconstructed, and then crops the specific region from the raw lidar point in order to generate the lidar.

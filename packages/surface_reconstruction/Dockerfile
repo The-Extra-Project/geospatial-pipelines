@@ -1,6 +1,6 @@
 FROM --platform=x86_64 ubuntu:22.04 as build
-
 ARG UBUNTU_FRONTEND=noninteractive
+
 ## installing libcgal and depdendencies of poissonRecon
 RUN apt-get update &&  apt-get install -y cmake build-essential libeigen3-dev libpng-dev libjpeg-dev libcgal-dev g++ coreutils \
  xz-utils \
@@ -35,23 +35,20 @@ rm -rf /tmp/*
 ## setting up the build enviornment and build files: 
 RUN mkdir -p /usr/src/app/reconstruction
 
-WORKDIR /
-
-
-COPY ./lib/  ./usr/src/app/reconstruction/lib/  
-COPY ./CMakeLists.txt ./usr/src/app/reconstruction/CMakeLists.txt
-COPY ./FindLAS.cmake ./usr/src/app/reconstruction/FindLAS.cmake
-COPY ./ ./usr/src/app/reconstruction/
-ADD --chown=user:777  ./src/ ./usr/src/app/reconstruction/src/
+WORKDIR /usr/src/app/reconstruction
+COPY . .
 ##  building the lastools:
 
-RUN mkdir -p  /usr/src/app/reconstruction/lib/LAStools/build/ \
-    && cd /usr/src/app/reconstruction/lib/LAStools/build \
+RUN ls ./src/normal_and_reconstruction.cpp
+
+RUN mkdir -p  ./lib/LAStools/build/ \
+    && cd ./lib/LAStools/build \
     && cmake ../ -DCMAKE_BUILD_TYPE=Release \
     && make
 
-RUN mkdir -p /usr/src/app/reconstruction/build \
-    && cd /usr/src/app/reconstruction/build \
+
+RUN mkdir -p ./build \
+    && cd ./build \
     && cmake ../ -DCMAKE_BUILD_TYPE=Release \
     && make 
 

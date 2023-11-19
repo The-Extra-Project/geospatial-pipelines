@@ -1,17 +1,17 @@
 [submodule "lastools"]
-	path = "./packages/surface_reconstruction/lib/LAStools"
+	path = packages/surface_reconstruction/lib/LAStools
 	url = https://github.com/LAStools/LAStools.git
 [submodule "py3dtiles"]
-	path = ".packages/py3dtiles"
-	url = "https://gitlab.com/Oslandia/py3dtiles.git"
+	path = packages/py3dtiles
+	url = https://gitlab.com/Oslandia/py3dtiles.git
 
 [submodule "surface_reconstruction"]
-	path = ".packages/surface_reconstruction"
-	url = "https://github.com/The-Extra-Project/sandbox.git"
+	path = packages/surface_reconstruction
+	url = https://github.com/The-Extra-Project/sandbox.git
 
 [submodule "3dTilesRendereerJS"]
-	path = ".packages/3dTilesRendererJS"
-	url = "https://github.com/NASA-AMMOS/3DTilesRendererJS"
+	path = packages/3dTilesRendererJS
+	url = https://github.com/NASA-AMMOS/3DTilesRendererJS
 [submodule "packages/surface_reconstruction/lib/PoissonRecon"]
 	path = packages/surface_reconstruction/lib/PoissonRecon
 	url = https://github.com/mkazhdan/PoissonRecon.git

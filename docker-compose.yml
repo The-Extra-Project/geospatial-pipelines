@@ -6,8 +6,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8081:8081"
-    
-    
     volumes:
       - "./packages/surface_reconstruction/datas:/usr/src/app/reconstruction/datas/"
   
