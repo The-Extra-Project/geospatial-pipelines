@@ -1,8 +1,9 @@
 
 """georender package script
-it crops the specific region from the given geoordinate of the given shape file and then regenerates it into the laz file for reconstruction.
+It crops the specific region from the given geoordinate (from lidarHD) consisting of
+large scale shape files of the geographic region
+and then regenerates it into the laz file for reconstruction.
 """
-
 
 import argparse
 import geopandas as gpd
@@ -12,11 +13,10 @@ from shapely.ops import transform
 from web3Storage import API
 import os
 from subprocess import run
-import logging
-import sys
-from pathlib import Path
 from dotenv import dotenv_values
 import laspy
+import open3d
+#from open3d.cuda.pybind import crop 
 
 config = dotenv_values(dotenv_path='../../../.env')
 
@@ -25,10 +25,6 @@ from functools import partial
 
 from subprocess import check_call
 import shutil
-# from GDAL import gdal
-
-# ## for handling the SHP files that are streamed / downloaded
-# gdal.SetConfigOption('SHAPE_RESTORE_SHX', 'YES')
 
 ## api to access the w3 storage.
 w3 = API(os.getenv("W3_API_KEY"))
@@ -36,8 +32,7 @@ w3 = API(os.getenv("W3_API_KEY"))
 
 def fetch_shp_file(ipfs_cid, _filename, username) -> str:
     """
-    gets the shape file from the web3.storage as input, in order to run the surface reconstruction pipeline
-    
+    gets the shape file from the web3.storage as input in order to run the surface reconstruction pipeline
     Parameters:
 
     :ipfs_cid: is the CID hash where the shape file is stored on IPFS
@@ -46,14 +41,12 @@ def fetch_shp_file(ipfs_cid, _filename, username) -> str:
     """
     
     # create a directory for the user for the first time.
-    path_datas = os.path.join(os.getcwd() + "/" + username+ "/datas")
-    userdir = (path_datas + "/" + username)
+    path_datas = os.path.join(os.getcwd() + "/" + username)
 
     ## check if the given userdir is created first time
-    if os.path.isdir(userdir) == False:
-        os.mkdir(path=userdir)
-    os.chdir(userdir)    
-    
+    if os.path.isdir(path_datas) == False:
+        os.mkdir(path=path_datas)
+    os.chdir(path_datas)    
     print("Running with ipfs_cid={}, filename={}".format( ipfs_cid,_filename ) )
     url = 'https://' + ipfs_cid + '.ipfs.w3s.link/' + _filename 
     out_file = run(['wget', '-U Mozilla/5.0', url , '-O', _filename])
@@ -74,6 +67,25 @@ def create_bounding_box(latitude_max: int, lattitude_min: int, longitude_max: in
     return Polygon([(longitude_min, lattitude_min), (longitude_max, lattitude_min), (longitude_max, latitude_max), (longitude_min, latitude_max), (longitude_min, lattitude_min)])
 
 
+def creating_3D_point_cloud(path_point_path: str, MaxP , MinP):
+    """
+    creates the boundation box based on the UI application cropping specific regions of the model as the bounding box
+    """
+    
+    p1= [MaxP[0], MaxP[1], MinP[2]]
+    p2= [MaxP[0],MinP[1],MinP[2]]
+    p3= [MinP[0],MaxP[1],MinP[2]]
+    p4= MinP
+    p5= MaxP
+    p6= [MinP[0],MaxP[1],MaxP[2]]
+    p7= [MinP[0],MinP[1],MaxP[2]]
+    p8= [MaxP[0],MinP[1], MaxP[2]]
+
+    listPoints1 = [p1,p3,p4,p2]
+    listPoints2 = [p5,p6,p7,p8]
+
+    print("bounding points from {} to {}".format(listPoints1, listPoints2))    
+    
 
 def get_pointcloud_details_polygon(pointargs: any, ipfs_cid: str, username: str, filename: str, epsg_standard: any = ['EPSG:4326', 'EPSG:2154']):
     """
@@ -164,6 +176,12 @@ def get_tile_details_point(coordX, coordY,username, filename, ipfsCid, epsg_stan
     return laz_path, fname, dirname
 
 
+def get_tile_details_cuboid():
+    """
+    
+    """
+    pass
+
 
 def generate_pdal_pipeline( dirname: str,pipeline_template_ipfs: str, username: str, epsg_srs:str =  "EPSG:4326" ):
     """
@@ -204,7 +222,7 @@ def generate_pdal_pipeline( dirname: str,pipeline_template_ipfs: str, username: 
     for fname in file_list:
         tag = fname[:-4]
         ftags.append( tag )
-        las_readers.append( { "type": "readers.las", "filename": fname, "tag": tag, "default_srs":epsg_srs } )
+        las_readers.append({ "type": "readers.las", "filename": fname, "tag": tag, "default_srs":epsg_srs } )
     
     # Insert file tags in the list of inputs to merge
     # Must be done before next insertion because we know the place of merge filter in the list at this moment
@@ -261,23 +279,14 @@ def run_georender_pipeline_point(cliargs):
     filename: name of the file stored on the given ipfs.
     """
     # Uses geopanda and shapely to intersect gps coord with available laz tiles files
-    # Returns corresponding download url and filename
+    # Returns corresponding download url and filename    
+    parameters = cliargs
     
-    #args = argparse.ArgumentParser(description="runs the georender pipeline based on the given geometric point")
-    # args.add_argument("coordinateX", help="write lattitude in source coordinate system")
-    # args.add_argument("coordinateY", required=True)
-    # args.add_argument("username")
-    # args.add_argument("ipfs_shp_files", required=True)
-    # args.add_argument("ipfs_template_files", required=True)
-    # args.add_argument("filename_template")
-    
-    parameters = args.parse_args(cliargs)
-    
-    filepath = os.getcwd() + parameters.username + "/datas"
-
-    os.mkdir( filepath)
+    filepath = os.getcwd() + "/" + parameters.username
+    if not os.path.exists(filepath):
+        os.mkdir(filepath)
     os.chdir(filepath)
-    laz_path, fname, dirname = get_tile_details_point(parameters.coordinateX, parameters.coordinateY, parameters.userprofile, parameters.filename, parameters.ipfs_cid)    
+    laz_path, fname, dirname = get_tile_details_point(parameters.Xcoord, parameters.Ycoord, parameters.username, parameters.filename_template, parameters.ipfs_template_files)    
     
     # Causes in case if the file has the interrupted downoad.
     if not os.path.isfile( fname ): 
@@ -309,8 +318,6 @@ def run_georender_pipeline_point(cliargs):
     cid = w3.post_upload('result.las')
     return cid
 
-
-
 def run_georender_pipeline_polygon(cliargs):
     """
     This function allows to run pipeline for the given bounded location and gives back the rendered 3D tileset
@@ -318,12 +325,8 @@ def run_georender_pipeline_polygon(cliargs):
     ::    
     """
     args = argparse.ArgumentParser(description="runs the georender pipeline based on the given geometric polygon")
-    # args.add_argument("coordinates", nargs=4, help="writes the bounding coordinates (longitude max/ min and then lattitude points separated by ,)")
-    # args.add_argument("username")
-    # args.add_argument("ipfs_cid",nargs='+',help="compulsory: adds the ipfs of the raw cloud image and the corresponding pipeline template. add first the cid of laz file and then of the pipeline template (separated by the space)", required=True)
-    # args.add_argument("filename", help="defines the filename of the given laz file that you want to generate 3D points for")
-    parameters = args.parse_args(cliargs)
-    
+    parameters = cliargs
+
     if cliargs.longitude_range_polygon:
         params_longitude = cliargs.longitude_range_polygon.split(',')
 
@@ -405,18 +408,71 @@ def main(cliargs):
         run_georender_pipeline_point(cliargs=cliargs)
     if cliargs.option  == "1":
         run_georender_pipeline_polygon(cliargs=cliargs)
-    
+    if cliargs.option == "2":
+        creating_3D_point_cloud(cliargs=cliargs)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("crops the given 3D point cloud for the user")
-    parser.add_argument("--option",type=int, default="0", help="chooses the algorithm to run in order to run the cropping job as point(0) opr deifning as polygon(1)")
-    parser.add_argument("--Xcoord",required= False, help="if point chosen,defines the longitude across which the cropping is to be started")
-    parser.add_argument("--Ycoord", required= False, help= "if point chosen,defines the lattitude across which the cropping is to be started")
-    parser.add_argument("--longitude_range_polygon", type= str, required= False, help="if chosen polygon job, its the range of longitude between which the cropping is done")
-    parser.add_argument("--lattitude_range_polygon", type= str, required= False, help="if chosen polygon job, its the range of lattitude between which the cropping is done")
-    parser.add_argument("--username", type=str, required= True,help="name (discord/telegram) of the user running this job")
-    parser.add_argument("--ipfs_shp_files", type=str,required= True, help="IPFS cid of the shape file which is to be cropped from")
-    parser.add_argument("--ipfs_template_files", required=True, help="IPFS cid of the template file which is to be generated")
-    parser.add_argument("--filename_template", required=True, help= "name of the template file which is to be added to the result")
+    parser = argparse.ArgumentParser(description="Crops the given 3D point cloud for the user")
+
+    # Define parent parser for selecting the point cloud cropping category
+    parent_parser = parser.add_subparsers(title="Point Cloud Cropping Category", dest="parent")
+
+    # Define subparser for point cloud cropping
+    point_cropping_parser = parent_parser.add_parser(
+        "point", help="Crops point cloud based on a specified point"
+    )
+    point_cropping_parser.add_argument(
+        "--Xcoord", type=float, required=False, help="Longitude of the cropping point"
+    )
+    point_cropping_parser.add_argument(
+        "--Ycoord", type=float, required=False, help="Latitude of the cropping point"
+    )
+    point_cropping_parser.add_argument(
+        "--username", type=str, required=True, help="Username of the user running the job"
+    )
+    point_cropping_parser.add_argument(
+        "--ipfs_shp_files", type=str, required=True, help="IPFS CID of the shape file"
+    )
+    point_cropping_parser.add_argument(
+        "--ipfs_template_files", required=True, help="IPFS CID of the template file"
+    )
+    point_cropping_parser.add_argument(
+        "--filename_template", required=True, help="Name of the template file to be added"
+    )
+
+    # Define subparser for polygon-based point cloud cropping
+    polygon_cropping_parser = parent_parser.add_parser(
+        "polygon", help="Crops point cloud based on a specified polygon"
+    )
+    polygon_cropping_parser.add_argument(
+        "--longitude_range_polygon", type=str, required=False, help="Range of longitudes for cropping"
+    )
+    polygon_cropping_parser.add_argument(
+        "--lattitude_range_polygon", type=str, required=False, help="Range of latitudes for cropping"
+    )
+    polygon_cropping_parser.add_argument(
+        "--username", type=str, required=True, help="Username of the user running the job"
+    )
+    polygon_cropping_parser.add_argument(
+        "--ipfs_shp_files", type=str, required=True, help="IPFS CID of the shape file"
+    )
+    polygon_cropping_parser.add_argument(
+        "--ipfs_template_files", required=True, help="IPFS CID of the template file"
+    )
+    polygon_cropping_parser.add_argument(
+        "--filename_template", required=True, help="Name of the template file to be added"
+    )
+
+    # Parse the arguments
     args = parser.parse_args()
-    main(args)
+
+    if args.parent == "point":
+        # Execute point-based cropping
+        run_georender_pipeline_point(args)
+    elif args.parent == "polygon":
+        # Execute polygon-based cropping
+        run_georender_pipeline_polygon(args)
+    elif args.parent == "cuboid":
+        print("currently not implemented")
+    else:
+        print("Invalid cropping category. Please choose 'point', 'polygon' or  'cuboid'")

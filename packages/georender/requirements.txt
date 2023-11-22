@@ -3,10 +3,10 @@ geopandas
 shapely
 pyproj
 numpy==1.26.0
-GDAL==3.7.1.1
+GDAL==3.4.1
 requests
 python-dotenv
 laspy
 watchdog
-
+open3d==0.17.0
 
