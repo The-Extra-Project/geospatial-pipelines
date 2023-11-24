@@ -30,12 +30,14 @@ Running geospatial algorithms across various input raw  input datasets datasets 
 
 - [3dtilerendererJS](./packages/3DTilesRendererJS/): finally this is the visualization package that runs the 3dtile specification and then visualizes the result.
 
+- [bacalau-pipeline](): This is the workflow orchestration service consisting of bacalau / flyte that invokes the jobs sequentially and integration with the relevant datasets(available either on the IPFS / S3 object) in order to run E2E compute over data framework.
+
 ## Build instruction: 
 
 
-1. clone including the submodules : `git clone --recurse-submodules -j8 https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction.git`
+1. Clone including the submodules : `git clone --recurse-submodules -j8 https://github.com/The-Extra-Project/pipeline-point-cloud-recostruction.git`
 
-2. setup the enviornment variable (WEB3_STORAGE env variable) in both the docker-compose.yml and the run_bacalhau.sh script.
+2. Setup the enviornment variable (WEB3_STORAGE env variable) in both the docker-compose.yml and the run_bacalhau.sh script.
 
 
 3. in the dockerfile.bacalhau, add your corresponding mail in order to validate the web3-storage cli access to the session.

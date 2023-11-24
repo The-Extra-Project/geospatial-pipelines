@@ -2,11 +2,10 @@ py3dtiles
 geopandas
 shapely
 pyproj
-numpy==1.26.0
-GDAL==3.4.1
+numpy
 requests
 python-dotenv
 laspy
 watchdog
-open3d==0.17.0
-
+open3d
+bacalhau-sdk

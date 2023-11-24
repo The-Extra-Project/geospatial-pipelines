@@ -1,9 +1,9 @@
 
-FROM ghcr.io/osgeo/gdal:ubuntu-small-3.7.2 as base
+FROM ghcr.io/osgeo/gdal:ubuntu-small-3.8.0 as base
 
 WORKDIR /usr/src/app/georender
 
-LABEL org.opencontainers.image.description="Pipeline 3D surface reconstruction" \
+LABEL org.opencontainers.image.description="Pipeline pointcloud / geospatial data cropping" \
       org.opencontainers.image.authors="Dhruv Malik" \
       org.opencontainers.image.version="0.1"
 
@@ -18,20 +18,29 @@ RUN python3 -m venv /opt/venv
 
 COPY requirements.txt requirements.txt 
 
-RUN  pip install -r requirements.txt
+## installing PDAL in order to then use their bindings 
 
-COPY . .
+WORKDIR /
 
-FROM base as run
+RUN apt install -y cmake git mlocate
+
+## getting the geotiff for the setup of the pdal 
+
+ENV DGEOTIFF_LIBRARY='$(locate geotiff.h)'
+ENV DGEOTIFF_INCLUDE_DIR=/usr/include/geotiff
+RUN wget https://github.com/PDAL/PDAL/releases/download/2.6.0/PDAL-2.6.0-src.tar.bz2 && \
+7z x PDAL-2.6.0-src.tar.bz2 && 7z x PDAL-2.6.0-src.tar && rm -rf PDAL-2.6.0-src.tar.bz2  &&\
+cd PDAL-2.6.0-src && mkdir build && cd build && cmake .. 
+
+# RUN  pip install -r requirements.txt
+
+# COPY . .
+
+# FROM base as run 
 
 
-COPY --chmod=777 --from=base  /usr/src/app/georender/ /usr/src/app/georender/
+# COPY --chmod=777 --from=base  /usr/src/app/georender/ /usr/src/app/georender/
 
-WORKDIR /usr/src/app/georender
+# WORKDIR /usr/src/app/georender
 
-EXPOSE 8081
-
-
-RUN chmod +x ./src/georender.py && chmod +x run_georender_test.sh
-
-ENTRYPOINT [ "./run_module.sh" ]     
+# EXPOSE 8081
