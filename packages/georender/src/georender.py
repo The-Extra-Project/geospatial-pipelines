@@ -4,33 +4,31 @@ It crops the specific region from the given geoordinate (from lidarHD) consistin
 large scale shape files of the geographic region.
 and then regenerates it into the laz file for reconstruction.
 """
-
 import argparse
-import geopandas as gpd
+import laspy    
 import json
 from shapely.geometry import Polygon, Point
 from shapely.ops import transform
 import os
+import open3d as o3d
 from subprocess import run
 import laspy
-import open3d  
 from pyproj import Transformer, Proj
 from functools import partial
 from typing import List
-
+from shapely import LineString
 from subprocess import check_call
 import shutil
 
-
-def fetch_shp_file(_filename,username) -> str:
+def get_shp_file_path(_filename,username) -> str:
     """
     gets the shape file from the mounted storage as input in order to run the surface reconstruction pipeline
     Parameters:
-
     :_filename: is the name of the file to be downloaded (with the extension .shp)
     :username: is in which folder the given file is to be stored for maintaining the result separation.
     """
-    return (os.getcwd() + "/datas/" + username + "/" + _filename)
+    
+    return os.path.abspath(os.path.join('..', username , _filename))
 
 
 def create_bounding_box(latitude_max: int, lattitude_min: int, longitude_max: int, longitude_min: int):
@@ -40,24 +38,21 @@ def create_bounding_box(latitude_max: int, lattitude_min: int, longitude_max: in
     return Polygon([(longitude_min, lattitude_min), (longitude_max, lattitude_min), (longitude_max, latitude_max), (longitude_min, latitude_max), (longitude_min, lattitude_min)])
 
 
-def creating_3D_cuboid_cropping( MaxP, MinP):
+def creating_3D_cuboid_boundation(MaxP, MinP) -> any:
     """
     creates the boundation box based on the UI application cropping specific regions of the model as the bounding box
+    MaxP: its the max boundation point till when the user defined the boundation (defined as the tuple)
+    MinP: its the minimal / starting point of the boundation. 
     """
     
-    p1= [MaxP[0], MaxP[1], MinP[2]]
-    p2= [MaxP[0],MinP[1],MinP[2]]
-    p3= [MinP[0],MaxP[1],MinP[2]]
-    p4= MinP
-    p5= MaxP
-    p6= [MinP[0],MaxP[1],MaxP[2]]
-    p7= [MinP[0],MinP[1],MaxP[2]]
-    p8= [MaxP[0],MinP[1], MaxP[2]]
+    bounding_box = o3d.geometry.AxisAlignedBoundingBox(min_bound=MinP, max_bound=MaxP)
+    
+    return bounding_box
+    
+    
+    
 
-    listPoints1 = [p1,p3,p4,p2]
-    listPoints2 = [p5,p6,p7,p8]
-
-    print("bounding points from {} to {}".format(listPoints1, listPoints2))    
+    
     
 
 def get_pointcloud_details_polygon(pointargs: List[any], username: str, filename: str, cols_assembly_shapefile: List[str],  epsg_standard: any = ['EPSG:4326', 'EPSG:2154']):
@@ -65,7 +60,6 @@ def get_pointcloud_details_polygon(pointargs: List[any], username: str, filename
     Parameters
     -----------
     function for cropping the region defined by specific boundation defined by the user on the given shp file with given coordinate standard
-    
     pointargs: list of input points defining the boundation ( as lattitude_max, lattitude_min, longitude_max, longitude_min)
     
     ipfs_cid: cid of the corresponding shp file from which the result is to be cropped.
@@ -86,9 +80,10 @@ def get_pointcloud_details_polygon(pointargs: List[any], username: str, filename
 
     # this is the docker path of file, will be changed to the w3storagea
     print("reading the shp file")
-    
-    path = fetch_shp_file(filename, username)
-    data = gpd.read_file(path)
+  
+
+    path = get_shp_file_path(filename, username)
+    data = laspy.read_file(path)
     
     polygonRegion = create_bounding_box(pointargs[0], pointargs[1], pointargs[2], pointargs[3])
 
@@ -126,9 +121,9 @@ def get_tile_details_point(coordX, coordY,username, filename, cols_assembly_shap
     """
     print( "Running with X={}, Y={}".format( coordX, coordY ) )
     ## function  to download file from ipfs to given path in the docker.
-    fp = fetch_shp_file(_filename= filename, username= username)
+    fp = get_shp_file_path(_filename= filename, username= username)
     
-    data = gpd.read_file(fp)
+    data = laspy.read(fp)
 
     # todo : how to avoid rewriting too much code between bounding box mode and center mode ?
     # todo : Document input format and pyproj conversion
@@ -150,11 +145,29 @@ def get_tile_details_point(coordX, coordY,username, filename, cols_assembly_shap
     return laz_path, fname, dirname
 
 
-def get_tile_details_cuboid():
+def get_tile_details_cuboid(points: List[dict],username: str, filename):
     """
+    reads the file and based on the given the given cropping volume (defined by x,y,z) , it will return the generated crop file , file and corresponding directory.
+    """
+    path_datas = os.path.abspath(__file__ , '..', username, "/datas")
+    ## fetching the x,y,z points boundation. for cuboidal cropping it'll be conssiting of 2 points.
+    xi = [point['x'] for point in points]
+    yi = [point['y'] for point in points]
+    zi = [point['z'] for point in points]
+    
+    print("Running with xi={}, yi={}, zi={}".format(xi, yi, zi))
+    fp = get_shp_file_path(filename, username)
+    
+    data = o3d.geometry.read_point_cloud(fp, format="xyz")
+    ## getting the boundation
+    boundation = creating_3D_cuboid_boundation((xi[0], yi[0], zi[0]), (xi[1], yi[1], zi[1]))
+    resultingCrop = data.crop(boundation)
+    
+    return resultingCrop
 
-    """
-    pass
+    
+    
+    
 
 def generate_pdal_pipeline( dirname: str,pipeline_template: str, username: str, epsg_srs:str =  "EPSG:4326" ):
     """
@@ -218,8 +231,6 @@ def run_georender_pipeline_point(cliargs):
     username: username of the user profile
     filename: name of the file stored on the given ipfs.
     """
-    # Uses geopanda and shapely to intersect gps coord with available laz tiles files
-    # Returns corresponding download url and filename    
     parameters = cliargs
     
     filepath = os.getcwd() + "/" + parameters.username
@@ -229,11 +240,11 @@ def run_georender_pipeline_point(cliargs):
     
     ## TODO: generate the various 
     
-    laz_path, fname, dirname = get_tile_details_point(parameters.Xcoord, parameters.Ycoord, parameters.username,  parameters.filename_template)    
+    laz_path, fname, dirname = get_tile_details_point(parameters.Xcoord, parameters.Ycoord, parameters.username, parameters.filename_template, parameters.cols_assembly_shapefile)    
     
     # Causes in case if the file has the interrupted downoad.
     if not os.path.isfile( fname ): 
-        check_call( ["wget", "--user-agent=Mozilla/5.0", laz_path])
+        check_call( ["wget", "--user-agent=Mozilla/5.0 ", laz_path])
     
     # Extract it
     
@@ -267,7 +278,7 @@ def run_georender_pipeline_polygon(cliargs):
     :coordinates: a list of 4 coordinates [lattitude_max, lattitude_min, longitude_max, longitude_min ]
     ::    
     """
-    args = argparse.ArgumentParser(description="runs the georender pipeline based on the given geometric polygon")
+    args = argparse.ArgumentParser(description="runs the georender pipeline based on the given polygon")
     parameters = cliargs
 
     if cliargs.longitude_range_polygon:
@@ -325,11 +336,7 @@ def las_to_tiles_conversion(username: str):
             + "registry.gitlab.com/oslandia/py3dtiles:142-create-docker-image" , "convert " , "app/usr/datas/" + last_las_file  + "--out" + destination_tile_file ])
 
     file_name = os.listdir(destination_tile_file)
-        # Causes in case if the file has the interrupted downoad.
-    if os.path.isdir( destination_tile_file ): 
-        print("uploading the final tile files")
-        w3.post_upload(files=file_name)
-
+    return file_name
 
 
 
@@ -354,7 +361,6 @@ def main(cliargs):
     if cliargs.option == "2":
         print('TODO')
         #creating_3D_point_cloud(cliargs=cliargs)
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Crops the given 3D point cloud for the user")
     # Define parent parser for selecting the point cloud cropping category
@@ -376,7 +382,10 @@ if __name__ == "__main__":
     point_cropping_parser.add_argument(
         "--filename_template", required=True, help="Name of the template file to be added"
     )
-
+    
+    point_cropping_parser.add_argument(
+        "--cols_assembly_shapefile", nargs='+', required=True, help="these are array of the columns that are named in the assembly shape file "
+    )
     # Define subparser for polygon-based point cloud cropping
     polygon_cropping_parser = parent_parser.add_parser(
         "polygon", help="Crops point cloud based on a specified polygon"
@@ -393,7 +402,13 @@ if __name__ == "__main__":
     polygon_cropping_parser.add_argument(
         "--filename_template", required=True, help="Name of the template file to be added"
     )
-
+    
+    
+    cuboid_cropping_parser = parent_parser.add_parser("cuboid", help="helps to crop the specific region for the user in order to fetch the result")
+    cuboid_cropping_parser.add_argument(
+        "--min_points", required=True, help="tuple of points that defines the  minimum point"
+    )
+    
     # Parse the arguments
     args = parser.parse_args()
 
