@@ -32,15 +32,16 @@ RUN wget https://github.com/PDAL/PDAL/releases/download/2.6.0/PDAL-2.6.0-src.tar
 7z x PDAL-2.6.0-src.tar.bz2 && 7z x PDAL-2.6.0-src.tar && rm -rf PDAL-2.6.0-src.tar.bz2  &&\
 cd PDAL-2.6.0-src && mkdir build && cd build && cmake .. 
 
-# RUN  pip install -r requirements.txt
+RUN  pip install -r requirements.txt
 
-# COPY . .
+COPY . .
 
-# FROM base as run 
+FROM base as run 
 
+ENV DISPLAY "0.0"
 
-# COPY --chmod=777 --from=base  /usr/src/app/georender/ /usr/src/app/georender/
+COPY --chmod=777 --from=base  /usr/src/app/georender/ /usr/src/app/georender/
 
-# WORKDIR /usr/src/app/georender
+WORKDIR /usr/src/app/georender
 
-# EXPOSE 8081
+EXPOSE 8081

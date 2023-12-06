@@ -44,15 +44,8 @@ def creating_3D_cuboid_boundation(MaxP, MinP) -> any:
     MaxP: its the max boundation point till when the user defined the boundation (defined as the tuple)
     MinP: its the minimal / starting point of the boundation. 
     """
-    
     bounding_box = o3d.geometry.AxisAlignedBoundingBox(min_bound=MinP, max_bound=MaxP)
-    
     return bounding_box
-    
-    
-    
-
-    
     
 
 def get_pointcloud_details_polygon(pointargs: List[any], username: str, filename: str, cols_assembly_shapefile: List[str],  epsg_standard: any = ['EPSG:4326', 'EPSG:2154']):
