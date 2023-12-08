@@ -10,3 +10,4 @@ watchdog
 open3d
 bacalhau-sdk
 laspy[lazrs,laszip]
+openai
