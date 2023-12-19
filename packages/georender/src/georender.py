@@ -19,19 +19,19 @@ from typing import List
 from shapely import LineString
 from subprocess import check_call
 import shutil
-from pipeline_generation import PDAL_json_generation_template
-
+import sys
+sys.path.append('..')
+from georender.pipeline_generation import PDAL_json_generation_template
 
 genAIObject = PDAL_json_generation_template()
 
 def get_shp_file_path(_filename,username) -> str:
     """
-    Gets the shape file from the mounted storage as input in order to run the surface reconstruction pipeline
+    Gets the shape file from the mounted storage as input in order to crop specific portions
     Parameters:
     :_filename: is the name of the file to be downloaded (with the extension .shp)
     :username: is in which folder the given file is to be stored for maintaining the result separation.
     """
-    
     return os.path.abspath(os.path.join('..', username , _filename))
 
 
@@ -41,7 +41,6 @@ def create_bounding_box(latitude_max: int, lattitude_min: int, longitude_max: in
     """
     return Polygon([(longitude_min, lattitude_min), (longitude_max, lattitude_min), (longitude_max, latitude_max), (longitude_min, latitude_max), (longitude_min, lattitude_min)])
 
-
 def creating_3D_cuboid_boundation(MaxP, MinP) -> any:
     """
     creates the boundation box based on the UI application cropping specific regions of the model as the bounding box
@@ -50,21 +49,16 @@ def creating_3D_cuboid_boundation(MaxP, MinP) -> any:
     """
     bounding_box = o3d.geometry.AxisAlignedBoundingBox(min_bound=MinP, max_bound=MaxP)
     return bounding_box
-    
 
-def get_pointcloud_details_polygon(pointargs: List[any], username: str, filename: str, cols_assembly_shapefile: List[str],  epsg_standard: any = ['EPSG:4326', 'EPSG:2154']):
+def get_pointcloud_details_polygon(username: str, filename: str, cols_assembly_shapefile: List[str],  epsg_standard: any = ['EPSG:4326', 'EPSG:2154'], pointargs: List[any] = ["",""]):
     """
     Parameters
     -----------
-    function for cropping the region defined by specific boundation defined by the user on the given shp file with given coordinate standard
+    function for cropping the region defined by specific boundation defined by the user on the given shp file with coordinate standard
     pointargs: list of input points defining the boundation ( as lattitude_max, lattitude_min, longitude_max, longitude_min)
     
-    ipfs_cid: cid of the corresponding shp file from which the result is to be cropped.
-    username: user that has executed the pipeline operation.
-    filename: name of the shape file to be accessed.
     cols_assembly_shapefile: its the columns of the assembly shapefile that consist of mapping between the laz filename and coresponding URL
-        - used for generating the pipeline for execution.
-        
+            
     epsg_standard: defines the coordinate standards for which the given given coordinate values are to be transformed
         - by default the coordinates will be taken for french standard and converted from the normal GPS coordinate standard , but can be defined based on specific regions.
     Returns:
@@ -78,7 +72,6 @@ def get_pointcloud_details_polygon(pointargs: List[any], username: str, filename
     # this is the docker path of file, will be changed to the w3storagea
     print("reading the shp file")
   
-
     path = get_shp_file_path(filename, username)
     data = laspy.read_file(path)
     
@@ -158,6 +151,7 @@ def get_tile_details_cuboid(points: List[dict],username: str, filename):
     data = o3d.geometry.read_point_cloud(fp, format="xyz")
     ## getting the boundation
     boundation = creating_3D_cuboid_boundation((xi[0], yi[0], zi[0]), (xi[1], yi[1], zi[1]))
+    
     resultingCrop = data.crop(boundation)
     
     return resultingCrop
@@ -194,7 +188,7 @@ def generate_pdal_pipeline( dirname: str,pipeline_template: str, username: str, 
     
     pdal_pipeline = json.loads( file_str )
     
-    return pdal_pipeline
+    return pdal_pipeline 
 
 ## Pipeline creation
 def run_georender_pipeline_point(cliargs):
@@ -238,19 +232,16 @@ def run_georender_pipeline_point(cliargs):
         f.write( bytes( [17, 0, 0, 0] ) )
         f.close()
     ## now running the command to generate the 3d tile from the stored pipeline 
-    os.chdir()
     check_call(["pdal", "pipeline",pipeline_file])
     
     # shutil.move( 'result.las', '../result.las' )
     print('resulting rendering successfully generated, now uploading the files to ipfs')
-    cid = w3.post_upload('result.las')
-    return cid
+    return os.path.abspath(pipeline_file)
 
 def run_georender_pipeline_polygon(cliargs):
     """
     This function allows to run pipeline for the given bounded location and gives back the rendered 3D tileset
-    :coordinates: a list of 4 coordinates [lattitude_max, lattitude_min, longitude_max, longitude_min ]
-    ::    
+    :coordinates: a list of 4 coordinates [lattitude_max, lattitude_min, longitude_max, longitude_min ].
     """
     args = argparse.ArgumentParser(description="runs the georender pipeline based on the given polygon")
     parameters = cliargs
@@ -263,7 +254,7 @@ def run_georender_pipeline_polygon(cliargs):
 
     pointargs = [params_longitude[0], params_lattitude[0], params_longitude[1], params_lattitude[1]]
     
-    laz_path, fname, dirname = get_pointcloud_details_polygon(pointargs=pointargs,ipfs_cid=cliargs.ipfs_shp_files, username= cliargs.username)
+    laz_path, fname, dirname = get_pointcloud_details_polygon(ipfs_cid=cliargs.ipfs_shp_files, username= cliargs.username, pointargs=pointargs)
     filepath = os.getcwd() + parameters.username + "/datas"
     os.mkdir(filepath)
     os.chdir(filepath)
