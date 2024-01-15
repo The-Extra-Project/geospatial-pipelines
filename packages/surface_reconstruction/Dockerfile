@@ -12,17 +12,8 @@ RUN apt-get update &&  apt-get install -y cmake build-essential libeigen3-dev li
  wget \
  libjpeg-dev \
  libjpeg-turbo8-dev  --assume-yes \
- && rm -rf /var/lib/apt/lists/*
-
-#
-## installation of boost (very time taking process, need to find the alternative)
-RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.83.0/source/boost_1_83_0.tar.bz2 && \
- tar  -xf boost_1_83_0.tar.bz2 && \
- cd boost_1_83_0 && \
- ./bootstrap.sh --prefix=/usr/ && \
-./b2 install && \
-rm -rf /tmp/*
-
+ && rm -rf /var/lib/apt/lists/* \
+ && apt-get install libboost-all-dev
 
 # RUN git clone https://github.com/mkazhdan/PoissonRecon.git  \
 # && cd PoissonRecon/ \
