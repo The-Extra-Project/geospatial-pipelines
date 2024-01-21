@@ -1,0 +1,17 @@
+{
+    "name": "@extralabs/geospatial-pipelines",
+    "version": "0.0.1",
+    "description": "package to run reconstruction operations and rendering on pointcloud or imagery datasets",
+    "main": "",
+    "directories": {
+      "test": "test"
+    },
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+      "point_cloud_data"
+    ],
+    "author": "Dhruv Malik",
+    "license": "ISC"
+  }  
