@@ -1,9 +1,4 @@
-from open3d import io, geometry, data, visualization
-
-
-#class ModelCategory:
-
-
+from open3d import io, geometry, data
 
 class PointCloud3D():
   stored_pcd_dataset_path:str
@@ -34,7 +29,7 @@ class PointCloud3D():
     boundingBox.max_bound = max_point
     return boundingBox
 
-  def crop_pcd(self, boundingBox: geometry.AxisAlignedBoundingBox, demo_name):
+  def crop_pcd(self, min_bound, max_bound, demo_name):
     """
     removes the portion defined by the bounding box and then stores this to the output
     boundingBox is the given boundation that is created by the user.
@@ -42,7 +37,7 @@ class PointCloud3D():
     """
 
     pcd = io.read_point_cloud(filename=self.stored_pcd_dataset_path)
-    vol = geometry.PointCloud.crop(pcd, boundingBox)
+    vol = geometry.crop_point_cloud(pcd,min_bound, max_bound)
     io.write_point_cloud(demo_name, vol)
 
   def combine_point_clouds(self,pcd_2, final_name, voxel_size):

@@ -7,13 +7,17 @@ CREDITS: the code here is taken from the sdfstudio process_data:  https://github
 """
 
 
-
+from typing import Any
+from read_write_model import read_model
 
 from nerfstudio.process_data import (
     colmap_utils, hloc_utils, polycam_utils, record3d_utils, process_data_utils
 )
 import sys
+import plotly.graph_objs as go
+
 from nerfstudio.utils import install_checks
+import matplotlib.pyplot as plt
 #import pycolmap
 import cv2
 from subprocess import check_call
@@ -24,6 +28,10 @@ from rich.console import Console
 from typing_extensions import Annotated, Literal
 from dataclasses import dataclass
 import json
+from collections import OrderedDict
+import torch
+import numpy as np
+
 
 
 @dataclass
@@ -39,7 +47,7 @@ class ColmapDataParsing():
         datafolder = filepath
 
     def fetch_frame(self,downsampling_rate, count):  
-        video = cv2.VideoCapture(datafolder)
+        video = cv2.VideoCapture(self.datafolder)
         video.set(cv2.CAP_PROP_POS_MSEC, downsampling_rate * 1000)
         frame, image = video.read()
         if frame:
@@ -127,18 +135,172 @@ class ColmapDataParsing():
         # Perform image undistortion
         check_call(['colmap', 'image_undistorter', '--image_path', os.path.join(self.datafolder, 'images_raw'), '--input_path', os.path.join(self.datafolder, 'sparse'), '--output_path', os.path.join(self.datafolder, 'undistorted_images'), '--output_type', 'COLMAP'])    
 
-    def analyze_colmap_images():
+    def analyze_colmap_images(self,camera_bin_path, transform_file, camera_depth, coordinates_adjust = ["0", "0", "0", "1"] ):
         """
         this function lets user to:
-        - read the generated transforms.json and the associated alligned images.
+        - read the generated transforms.json and inspects the data.
         - lets user to allign the bounding sphere and orientation values of the camera for the specific frames that're missaligned
-        - and then registers the new parameter in the transforms.json in order to then be passed to the training stage. 
+        - and then registers the new parameter in the transforms.json
+        - gets the result of the images as the plotly figure
+        - then its stores the transform.json and thus can be used in training stage. 
+        ---------
+        camera_bin_path: is the path corresponding to the camera.bin file generated after the reconstruction pipeline
+        transform_file is the path of the transforms.json file corresponding to the given path.
+        coordinates_adjust: is the array  that consist of the following values : length of viewbox around (x, y, z) and the scale of viewing the values
+        Credits to the nvidia neuralangelo collab notebook explaining the process
         """
         
-        pass
+        camera, imgs, points_3D = read_model(path=camera_bin_path, ext=".bin")
+        
+        assert imgs is not None
+        images = OrderedDict(sorted(imgs.items()))
+        ## now representing the images into the tensors as Q and T description in eigen format:
+        qvecs = torch.from_numpy(np.stack([image.qvec for image in images.values()]))
+        tvecs = torch.from_numpy(np.stack([image.tvec for image in images.values()]))
+        Rs = camera.quaternion.q_to_R(qvecs)
+        poses = torch.cat([Rs, tvecs[..., None]], dim=-1)  # [N,3,4]
+        print(f"# images: {len(poses)}")
+        # Get the sparse 3D points and the colors.
+        xyzs = torch.from_numpy(np.stack([point.xyz for point in points_3D.values()]))
+        rgbs = np.stack([point.rgb for point in points_3D.values()])
+        rgbs_int32 = (rgbs[:, 0] * 2**16 + rgbs[:, 1] * 2**8 + rgbs[:, 2]).astype(np.uint32)
+        print(f"# points: {len(xyzs)}")
+
+        transform_fname = transform_file
+        with open(transform_fname) as file:
+            meta = json.load(file)
+        center = meta["sphere_center"]
+        radius = meta["sphere_radius"]
+        
+        ## now adjusting the parameters in order to make bounding sphere fit corresponding to the region of interest 
+        ## approximatively wrt each of the images these coordinates should be fitting .
+        
+        center += np.array([coordinates_adjust[0],coordinates_adjust[1],coordinates_adjust[2]])
+        radius *= coordinates_adjust[3]
+        
+        ## creating some random points for determining thr nature of the mis-alignment
+        sphere_points = np.random.randn(100000, 3)
+        sphere_points = sphere_points / np.linalg.norm(sphere_points, axis=-1, keepdims=True)
+        sphere_points = sphere_points * radius + center
+        
+        vis_depth = camera_depth 
+        colors = rgbs / 255.0
+        ## plotly values
+        x, y, z = *xyzs.T,
+        sphere_x, sphere_y, sphere_z = *sphere_points.T,
+        sphere_colors = ["#4488ff"] * len(sphere_points)
+        traces_poses = self.plotly_visualize_pose(poses, vis_depth=vis_depth, xyz_length=0.02, center_size=0.01, xyz_width=0.005, mesh_opacity=0.05)
+        trace_points = go.Scatter3d(x=x, y=y, z=z, mode="markers", marker=dict(size=1, color=colors, opacity=1), hoverinfo="skip")
+        trace_sphere = go.Scatter3d(x=sphere_x, y=sphere_y, z=sphere_z, mode="markers", marker=dict(size=0.5, color=sphere_colors, opacity=0.7), hoverinfo="skip")
+        traces_all = traces_poses + [trace_points, trace_sphere]
+        layout = go.Layout(scene=dict(xaxis=dict(showspikes=False, backgroundcolor="rgba(0,0,0,0)", gridcolor="rgba(0,0,0,0.1)"),
+                                    yaxis=dict(showspikes=False, backgroundcolor="rgba(0,0,0,0)", gridcolor="rgba(0,0,0,0.1)"),
+                                    zaxis=dict(showspikes=False, backgroundcolor="rgba(0,0,0,0)", gridcolor="rgba(0,0,0,0.1)"),
+                                    xaxis_title="X", yaxis_title="Y", zaxis_title="Z", dragmode="orbit",
+                                    aspectratio=dict(x=1, y=1, z=1), aspectmode="data"), height=800)
+        fig = go.Figure(data=traces_all, layout=layout)
+        fig.show()
+        
+        
+    ## other extra functions that are fetched from the neuralangelo.nerf libraries 
+    def plotly_vizualize_pose(self,poses,vis_depth,xyz_length, center_size,xyz_width=5, mesh_opacity=0.05):
+        """
+        function for generating the vizualization poses for the given user
+        poses: a tensor defining the reltive allignment of the given structure to be reconstructed.
+        vis_depth: is the depth settings of the camera (in meters)
+        xyz_length: is the relative box lengthwise in the various directions.
+        
+        """
+        def get_xyz_indicators(pose, length=0.1):
+            xyz = torch.eye(4, 3)[None] * length
+            xyz = self.transform_pts(xyz, pose)
+            return xyz
+        
+        def get_camera_mesh(pose, depth=1):
+            vertices = torch.tensor([[-0.5, -0.5, 1],
+                                    [0.5, -0.5, 1],
+                                    [0.5, 0.5, 1],
+                                    [-0.5, 0.5, 1],
+                                    [0, 0, 0]]) * depth  # [6,3]
+            faces = torch.tensor([[0, 1, 2],
+                                [0, 2, 3],
+                                [0, 1, 4],
+                                [1, 2, 4],
+                                [2, 3, 4],
+                                [3, 0, 4]])  # [6,3]
+            vertices = self.transform_pts(vertices[None], pose)  # [N,6,3]
+            wireframe = vertices[:, [0, 1, 2, 3, 0, 4, 1, 2, 4, 3]]  # [N,10,3]
+            return vertices, faces, wireframe
+        def merge_meshes(vertices, faces):
+            mesh_N, vertex_N = vertices.shape[:2]
+            faces_merged = torch.cat([faces + i * vertex_N for i in range(mesh_N)], dim=0)
+            vertices_merged = vertices.view(-1, vertices.shape[-1])
+            return vertices_merged, faces_merged
+        
+        def merge_wireframes_plotly(wireframe):
+            wf_dummy = wireframe[:, :1] * np.nan
+            wireframe_merged = torch.cat([wireframe, wf_dummy], dim=1).view(-1, 3)
+            return wireframe_merged
+        
+        def merge_xyz_indicators_plotly(xyz):  # [N,4,3]
+            xyz = xyz[:, [[-1, 0], [-1, 1], [-1, 2]]]  # [N,3,2,3]
+            xyz_0, xyz_1 = xyz.unbind(dim=2)  # [N,3,3]
+            xyz_dummy = xyz_0 * np.nan
+            xyz_merged = torch.stack([xyz_0, xyz_1, xyz_dummy], dim=2)  # [N,3,3,3]
+            xyz_merged = xyz_merged.view(-1, 3)
+            return xyz_merged
 
 
-
+        N = len(poses)    
+        centers_cam = torch.zeros(N, 1, 3)
+        centers_world = self.transform_pts(centers_cam, poses)
+        centers_world = centers_world[:, 0]
+        # Get the camera wireframes.
+        vertices, faces, wireframe = get_camera_mesh(poses, depth=vis_depth)
+        xyz = get_xyz_indicators(poses, length=xyz_length)
+        vertices_merged, faces_merged = merge_meshes(vertices, faces)
+        wireframe_merged = merge_wireframes_plotly(wireframe)
+        
+        xyz_merged = merge_xyz_indicators_plotly(xyz)
+        # Break up (x,y,z) coordinates.
+        wireframe_x, wireframe_y, wireframe_z = wireframe_merged.unbind(dim=-1)
+        xyz_x, xyz_y, xyz_z = xyz_merged.unbind(dim=-1)
+        centers_x, centers_y, centers_z = centers_world.unbind(dim=-1)
+        vertices_x, vertices_y, vertices_z = vertices_merged.unbind(dim=-1)
+        # Set the color map for the camera trajectory and the xyz indicators.
+        color_map = plt.get_cmap("gist_rainbow")
+        center_color = []
+        faces_merged_color = []
+        wireframe_color = []
+        xyz_color = []
+        x_color, y_color, z_color = *np.eye(3).T,
+        for i in range(N):
+            # Set the camera pose colors (with a smooth gradient color map).
+            r, g, b, _ = color_map(i / (N - 1))
+            rgb = np.array([r, g, b]) * 0.8
+            wireframe_color += [rgb] * 11
+            center_color += [rgb]
+            faces_merged_color += [rgb] * 6
+            xyz_color += [x_color] * 3 + [y_color] * 3 + [z_color] * 3
+        # Plot in plotly.
+        plotly_traces = [
+            go.Scatter3d(x=wireframe_x, y=wireframe_y, z=wireframe_z, mode="lines",
+                        line=dict(color=wireframe_color, width=1)),
+            go.Scatter3d(x=xyz_x, y=xyz_y, z=xyz_z, mode="lines", line=dict(color=xyz_color, width=xyz_width)),
+            go.Scatter3d(x=centers_x, y=centers_y, z=centers_z, mode="markers",
+                        marker=dict(color=center_color, size=center_size, opacity=1)),
+            go.Mesh3d(x=vertices_x, y=vertices_y, z=vertices_z,
+                    i=[f[0] for f in faces_merged], j=[f[1] for f in faces_merged], k=[f[2] for f in faces_merged],
+                    facecolor=faces_merged_color, opacity=mesh_opacity),
+        ]
+        return plotly_traces
+                            
+    def homogenise_coord(X):    
+        return torch.cat([X,torch.ones_like(X[..., :1])], dim=-1)
+    
+    def transform_pts(self,X,pose: torch.tensor):
+        homogenise_coord = self.homogenise_coord(X)
+        return homogenise_coord @ pose.transform(-1,-2) 
 
 presentation_console = Console(width=120)
 
@@ -212,7 +374,7 @@ class NerfStudioCameraUtils():
                 colmap_utils.run_colmap(
                     image_dir=image_dir,
                     colmap_dir= colmap_dir,
-                    camera_model= process_data_utils.CAMERA_MODELS[self.camera_type],
+                    camera_model= process_data_utils.process_data_utils.CAMERA_MODELS[self.camera_type],
                     gpu=self.gpu,
                     verbose= self.verbose,
                     matching_method=self.matching_method,
@@ -223,7 +385,7 @@ class NerfStudioCameraUtils():
                 hloc_utils.run_hloc(
                     image_dir=image_dir,
                     colmap_dir=colmap_dir,
-                    camera_model=process_data_utils.CAMERA_MODELS[self.camera_type],
+                    camera_model=process_data_utils.process_data_utils.CAMERA_MODELS[self.camera_type],
                     verbose=self.verbose,
                     matching_method=self.matching_method,
                     feature_type=feature_type,
@@ -241,7 +403,7 @@ class NerfStudioCameraUtils():
                     cameras_path=colmap_dir / "sparse" / "0" / "cameras.bin",
                     images_path=colmap_dir / "sparse" / "0" / "images.bin",
                     output_dir=self.output_dir,
-                    camera_model=process_data_utils.CAMERA_MODELS[self.camera_type],
+                    camera_model=process_data_utils.process_data_utils.CAMERA_MODELS[self.camera_type],
                 )
                 image_data_log.append(f"Colmap matched {num_matched_frames} images")
                 
@@ -333,7 +495,7 @@ class NerfStudioCameraUtils():
                 colmap_utils.run_colmap(
                     image_dir=image_dir,
                     colmap_dir=colmap_dir,
-                    camera_model=CAMERA_MODELS[camera_type],
+                    camera_model=process_data_utils.CAMERA_MODELS[camera_type],
                     gpu=gpu,
                     verbose=verbose,
                     matching_method=matching_method,
@@ -343,32 +505,32 @@ class NerfStudioCameraUtils():
                 hloc_utils.run_hloc(
                     image_dir=image_dir,
                     colmap_dir=colmap_dir,
-                    camera_model=CAMERA_MODELS[camera_type],
+                    camera_model=process_data_utils.CAMERA_MODELS[camera_type],
                     verbose=verbose,
                     matching_method=matching_method,
                     feature_type=feature_type,
                     matcher_type=matcher_type,
                 )
             else:
-                CONSOLE.log("[bold red]Invalid combination of sfm_tool, feature_type, and matcher_type, exiting")
+                presentation_console.log("[bold red]Invalid combination of sfm_tool, feature_type, and matcher_type, exiting")
                 sys.exit(1)
 
         # Save transforms.json
         if (colmap_dir / "sparse" / "0" / "cameras.bin").exists():
-            with CONSOLE.status("[bold yellow]Saving results to transforms.json", spinner="balloon"):
+            with presentation_console.status("[bold yellow]Saving results to transforms.json", spinner="balloon"):
                 num_matched_frames = colmap_utils.colmap_to_json(
                     cameras_path=colmap_dir / "sparse" / "0" / "cameras.bin",
                     images_path=colmap_dir / "sparse" / "0" / "images.bin",
                     output_dir=output_dir,
-                    camera_model=CAMERA_MODELS[camera_type],
+                    camera_model=process_data_utils.CAMERA_MODELS[camera_type],
                 )
                 summary_log.append(f"Colmap matched {num_matched_frames} images")
             summary_log.append(colmap_utils.get_matching_summary(num_extracted_frames, num_matched_frames))
         else:
-            CONSOLE.log("[bold yellow]Warning: could not find existing COLMAP results. Not generating transforms.json")
+            presentation_console.log("[bold yellow]Warning: could not find existing COLMAP results. Not generating transforms.json")
 
-        CONSOLE.rule("[bold green]:tada: :tada: :tada: All DONE :tada: :tada: :tada:")
+        presentation_console.rule("[bold green]:tada: :tada: :tada: All DONE :tada: :tada: :tada:")
 
         for summary in summary_log:
-            CONSOLE.print(summary, justify="center")
-        CONSOLE.rule()
+            presentation_console.print(summary, justify="center")
+        presentation_console.rule()
