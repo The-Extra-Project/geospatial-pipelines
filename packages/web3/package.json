@@ -1,0 +1,24 @@
+{
+  "name": "@geospatial-pipelines/web3",
+  "version": "0.1.0",
+  "description": "package to deploy the smart contracts that associate the tokens to the various clients proportional to their contribution",
+  "main": "index.ts",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "web3",
+    "tokenization"
+  ],
+  "author": "Dhruv",
+  "license": "ISC",
+  "dependencies": {
+    "@chainlink/contracts": "^0.8.0",
+    "@openzeppelin/contracts": "^5.0.1",
+    "expressjs": "^1.0.1",
+    "hardhat": "^2.19.4"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0"
+  }
+}
