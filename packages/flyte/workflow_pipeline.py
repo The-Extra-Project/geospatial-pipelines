@@ -1,6 +1,6 @@
-from flytekit import workflow, tasks, kwtypes, dynamic
-from flytekitplugins.bacalhau import BacalhauTasks
-from bacalhau_apiclient.odels.all_of_job_spec import Spec
+from flytekit import workflow, task, kwtypes, dynamic
+from flytekitplugins.bacalhau import BacalhauTask
+from bacalhau_apiclient.models.all_of_job_spec import Spec
 import asyncio
 import json
 from typing import List
@@ -15,7 +15,7 @@ class GeospatialPipelineTaskQueue:
     - based on the status being active or stale, users cna remove certain tasks from the queue also
     - Then runs the task based on the given specification of the job input as the FIFO.
     """
-    workflow_tasks_object: List(BacalhauTasks)
+    workflow_tasks_object: any
     workflow_current: int   
     tasks_queue:any
     
@@ -38,7 +38,7 @@ class GeospatialPipelineTaskQueue:
         _name: its the name of the workflow task that needs to be executed.
         """
         
-        task = BacalhauTasks(
+        task = BacalhauTask(
         name= _name,
         inputs=kwtypes(
             spec=dict,
@@ -48,7 +48,7 @@ class GeospatialPipelineTaskQueue:
         enque_id = await self.tasks_queue.put(task)        
 
         return  enque_id
-    @tasks
+    @task
     async def dequeue_task(self):
         """
         this will dequque the latest task from the given job queue and run it on the flyte workflow.
@@ -58,26 +58,26 @@ class GeospatialPipelineTaskQueue:
             exit
         return dequed_task        
     
-    @workflow
-    async def workflow_execution(self,specs_json):
-        """
-        this function runs all of the tasks that are stored in the queue by running the enqueing the tasks one by one.
-        specs_json are the json specifications of the bacalhau that are to be executed with the deququed operation
-        """
+#    @workflow
+    # async def workflow_execution(self,specs_json):
+    #     """
+    #     this function runs all of the tasks that are stored in the queue by running the enqueing the tasks one by one.
+    #     specs_json are the json specifications of the bacalhau that are to be executed with the deququed operation
+    #     """
         
-        while True:
-            task_queue = await self.dequeue_task()
-            if task_queue is None:
-                break
-            task = task_queue(
-                api_version = self.version,
-                spec = dict(specs_json)
-            )
+        # while True:
+        #     task_queue = await self.dequeue_task()
+        #     if task_queue is None:
+        #         break
+        #     task = task_queue(
+        #         api_version = self.version,
+        #         spec = dict(specs_json)
+        #     )
 
-            print(task)
+        #     print(task)
 
-
-def main():
+@workflow
+async def workflow_execution():
     ## gives the various tasks to be executed in the project.
     ## credits to the example from bacalhau flyte project.
     
@@ -140,11 +140,22 @@ def main():
     tasks.enqueue_task("task_1")
     tasks.enqueue_task("task_2")
     
-    tasks.workflow_execution(specs_json=specs_json)
+    #tasks.workflow_execution(specs_json=specs_json)
     
+    
+    while True:
+        task_queue = await tasks.dequeue_task()
+        if task_queue is None:
+            break
+        task = task_queue(
+            api_version = "0.1",
+            spec = dict(specs_json)
+        )
+
+        print(task)
 
 
 
 if __name__ == "__main__":
-    main()
+    workflow_execution()
     
