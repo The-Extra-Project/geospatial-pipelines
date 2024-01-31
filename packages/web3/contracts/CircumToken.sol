@@ -5,7 +5,6 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
 
-
 struct IndividualContribution {
 uint clientContribution; // parameter that corresponds to the number of point clouds generated in the reconstructed model
 uint reallignmentParameter; // this is defined by the colmap for images in order to insure that whether the 
@@ -14,6 +13,9 @@ uint reallignmentParameter; // this is defined by the colmap for images in order
 contract CircumToken is ERC20, AccessControl {
     mapping (address=>uint256) tokenMinted;
     mapping(address => IndividualContribution) contributionMetrics;
+
+    event IndividualContributionAdded(address indexed _clientAddresss);
+    event tokenMinted(address indexed _address, uint amount);
     uint  tokenMultiplier; // this is the parameter (natural number decided by admin) that is multiplied with the total contribution score in order to generate the renumeration of the token.
     address oracleAddress;
     address keeperAddress; // address of the keeper bot (that essentially calls the mint function as soon as the results of the reconstruction are generated).
@@ -31,6 +33,7 @@ contract CircumToken is ERC20, AccessControl {
     function addIndividualContribution(address _clientAddress, IndividualContribution memory _contribution)  public returns(bool) {
         assert(_clientAddress != address(0) && hasRole(ORACLE_ROLE, msg.sender) );
         contributionMetrics[_clientAddress] = _contribution;
+        emit IndividualContributionAdded(_clientAddress);
         return true;
     }
 
@@ -48,6 +51,7 @@ contract CircumToken is ERC20, AccessControl {
         uint tokenToBeMinted =  contributionMetrics[_clientAddress].clientContribution - (tokenMultiplier * contributionMetrics[_clientAddress].reallignmentParameter );
         _mint(_clientAddress, tokenToBeMinted);
         tokenMinted[_clientAddress] += tokenToBeMinted;
+        emit tokenMinted(_clientAddress);
         return true;
 
     }
