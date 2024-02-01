@@ -12,8 +12,6 @@ const ContributeMetric = async (tokenAddress: string, signerInstance:  ethers.Si
     await circumToken.addIndividualContribution(clientAddress, params)
 
     circumToken.on("IndividualContributionAdded", (address, params) => {
-
         console.log("the function is executed with the address: " + address + "and the parameters" + params)
     })
-
 }

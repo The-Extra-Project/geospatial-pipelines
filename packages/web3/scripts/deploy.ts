@@ -12,7 +12,7 @@ async function main() {
   await ctContract.waitForDeployment();
 
   console.log(
-    `contract deployed with  address: ` + await ctContract.getAddress()
+    `contract deployed with  address: ` + await ctContract.address
   );
 }
 

@@ -4,7 +4,9 @@
   "description": "package to deploy the smart contracts that associate the tokens to the various clients proportional to their contribution",
   "main": "index.ts",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "run-function": "ts-node ./chainlink-functions/request.ts",
+    "build": ""
   },
   "keywords": [
     "web3",
@@ -16,10 +18,15 @@
     "@chainlink/contracts": "^0.8.0",
     "@chainlink/env-enc": "^1.0.5",
     "@chainlink/functions-toolkit": "^0.2.8",
+    "@chainlink/hardhat-chainlink": "^0.0.2",
     "@openzeppelin/contracts": "^5.0.1",
+    "@typechain/ethers-v5": "^11.1.2",
     "ethers": "^5.7.2",
     "expressjs": "^1.0.1",
-    "hardhat": "^2.19.4"
+    "hardhat": "^2.19.4",
+    "ts-node": "^10.9.2",
+    "typechain": "^8.3.2",
+    "typescript": "^5.3.3"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^4.0.0"

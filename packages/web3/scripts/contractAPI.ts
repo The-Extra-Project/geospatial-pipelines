@@ -9,14 +9,14 @@ import { HardhatEthersHelpers } from "hardhat/types"
 
 class tokenContractAPI {
     CircumToken: Promise<CircumToken>
-    circumTokenAddress: typeof ethers.ZeroAddress
-    userAddress: typeof ethers.ZeroAddress
+    circumTokenAddress: typeof ethers.constants.AddressZero
+    userAddress: typeof ethers.constants.AddressZero
     userWallet:  any
     provider: any
-    constructor(tokenContractAddress: typeof ethers.ZeroAddress, _userAddress: any, network_key: any, private_key ?: any ) {
+    constructor(tokenContractAddress: typeof ethers.constants.AddressZero, _userAddress: any, network_key: any, private_key ?: any ) {
         this.circumTokenAddress = tokenContractAddress
         this.userAddress = _userAddress
-        this.userWallet =  new ethers.Wallet(private_key,new ethers.AlchemyProvider(network_key,process.env.API_KEY))
+        this.userWallet =  new ethers.Wallet(private_key,new ethers.providers.AlchemyProvider(network_key,process.env.API_KEY))
         this.CircumToken = ethers.getContractAt("CircumToken",this.circumTokenAddress)
     }
     /**
@@ -25,13 +25,15 @@ class tokenContractAPI {
      * @returns 
      * 
      */
-    async createParameters( address: typeof ethers.ZeroAddress,inputParams:IndividualContributionStruct ): Promise<any> {
+    async createParameters( address: typeof ethers.constants.AddressZero,inputParams:IndividualContributionStruct ): Promise<any> {
         let status_output;
         try {
-        status_output = (await this.CircumToken).addIndividualContribution(address,inputParams).then((output) => {
+        
+            status_output = (await this.CircumToken).addIndividualContribution(address,inputParams).then((output) => {
+            console.log('parameters added are:',output)
         });
-
-        }
+        
+    }
         catch(e: any) {
             console.error('err:  ' + e)
         }

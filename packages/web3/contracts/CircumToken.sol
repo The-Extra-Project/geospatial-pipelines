@@ -15,7 +15,7 @@ contract CircumToken is ERC20, AccessControl {
     mapping(address => IndividualContribution) contributionMetrics;
 
     event IndividualContributionAdded(address indexed _clientAddresss);
-    event tokenMinted(address indexed _address, uint amount);
+    event TokenMinted(address indexed _address, uint amount);
     uint  tokenMultiplier; // this is the parameter (natural number decided by admin) that is multiplied with the total contribution score in order to generate the renumeration of the token.
     address oracleAddress;
     address keeperAddress; // address of the keeper bot (that essentially calls the mint function as soon as the results of the reconstruction are generated).
@@ -26,8 +26,8 @@ contract CircumToken is ERC20, AccessControl {
         tokenMultiplier = _tokenMultiplier;
         oracleAddress = _oracleAddress;
         keeperAddress = _keeperAddress;
-        _grantRole(MINTER_ROLE, _keeperAddress);
-        _grantRole(ORACLE_ROLE, oracleAddress);
+        grantRole(MINTER_ROLE, _keeperAddress);
+        grantRole(ORACLE_ROLE, oracleAddress);
     }
 
     function addIndividualContribution(address _clientAddress, IndividualContribution memory _contribution)  public returns(bool) {
@@ -51,7 +51,7 @@ contract CircumToken is ERC20, AccessControl {
         uint tokenToBeMinted =  contributionMetrics[_clientAddress].clientContribution - (tokenMultiplier * contributionMetrics[_clientAddress].reallignmentParameter );
         _mint(_clientAddress, tokenToBeMinted);
         tokenMinted[_clientAddress] += tokenToBeMinted;
-        emit tokenMinted(_clientAddress);
+        emit TokenMinted(_clientAddress, tokenToBeMinted);
         return true;
 
     }

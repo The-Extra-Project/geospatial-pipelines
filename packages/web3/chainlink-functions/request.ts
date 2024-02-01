@@ -3,6 +3,7 @@
  * 
  * Script for chainlink-functions for generating the 
  */
+
 import fs from "fs"
 import {
     SubscriptionManager,
@@ -12,7 +13,6 @@ import {
     decodeResult,
     FulfillmentCode,
 } from "@chainlink/functions-toolkit"
-
 
 import FunctionsClient from "@chainlink/contracts/abi/v0.8/FunctionsClient.json"
 
