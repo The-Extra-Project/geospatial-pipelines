@@ -1,2 +1,0 @@
-import georender_test
-import surface_reconstruction_test

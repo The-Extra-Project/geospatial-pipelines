@@ -1,4 +1,0 @@
-pytest
-requests
-w3storage
-python-dotenv
