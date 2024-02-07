@@ -1,30 +1,30 @@
 """
 This package script is for cropping and operation the the  point clouds generated from terestrial datasets
 """
-
 import openai
-import argparse
 import laspy    
 import json
-from shapely.geometry import Polygon, Point
-from shapely.ops import transform
 import os
-import open3d as o3d
-import laspy
+
 from pyproj import Transformer, Proj
 from functools import partial
 from typing import List
+
+from shapely.geometry import Polygon, Point
+from shapely.ops import transform
 from shapely import LineString
+import pandas as pd
+
 from subprocess import check_call
 import shutil
-import laspy
 import shapefile
 from llm.pipeline_generation import PDAL_json_generation_template
 import pycrs
-import pylas
-class CroppingUtilsLas():
+import geopandas as gpd
+
+class CroppingUtilsSHP():
     """   
-    This package reads the las files from terrestrial scans, and then allows user to fetch any section of the geocoordinate region 
+    This package reads the las files from the shp data fileformat, and then allows user to fetch any section of the geocoordinate region 
     from the shp file and fetches the output as las file
     """
     def __init__(self,_shp_file,_pipeline_file, username, _epsg_standard):
@@ -66,7 +66,7 @@ class CroppingUtilsLas():
         """
         return Polygon([(longitude_min, lattitude_min), (longitude_max, lattitude_min), (longitude_max, latitude_max), (longitude_min, latitude_max), (longitude_min, lattitude_min)])
 
-    def get_pointcloud_details_polygon(self, pointargs: List[any]):
+    def get_tile_details_polygon(self, pointargs: List[any]):
         """
         Parameters
         -----------
@@ -218,61 +218,79 @@ class CroppingUtilsLas():
         print('resulting rendering successfully generated, now uploading the files to ipfs')
         return os.path.abspath(pipeline_file)
 
-def run_georender_pipeline_polygon(self,coordinates: list(str), filepath, pointargs):
-    """
-    This function allows to run pipeline for the given bounded location and gives back the rendered 3D tileset
-    :coordinates: a list of 4 coordinates [lattitude_max, lattitude_min, longitude_max, longitude_min ].
-    filepath: path of the shp file.
+    def run_georender_pipeline_polygon(self, pointargs):
+        """
+        This function allows to run pipeline for the given bounded location and gives back the rendered 3D tileset
+        :coordinates: a list of 4 coordinates [lattitude_max, lattitude_min, longitude_max, longitude_min ].
+        filepath: path of the shp file.
+        
+        """
+        
+        laz_path, fname, dirname = self.get_pointcloud_details_polygon(pointargs=pointargs)
+        filepath = os.getcwd() + self.username + "/datas"
+        os.mkdir(filepath)
+        os.chdir(filepath)
+        
+        # Causes in case if the file has the interrupted downoad.
+        if not os.path.isfile( fname ): 
+            check_call( ["wget", "--user-agent=Mozilla/5.0", laz_path])
+        
+        
+        # Extract it
+        check_call( ["7z", "-y", "x", fname] ) 
+        pipeline_ipfs = self.ipfs_cid
+        self.generate_pdal_pipeline( dirname, pipeline_ipfs, self.username )
+        # run pdal pipeline with the generated json :
+        
+        os.chdir( dirname )
+        ## here the laz filename is written based on the various categories of the pointclouds for the given region        
+        for laz_fname in os.listdir( '.' ):            
+            self.fetch_classification_laz(laz_fname)
+        ## now running the command to generate the 3d tile from the stored pipeline 
+        pipeline_template = self.pipeline_file 
+        check_call( ["pdal", "pipeline",pipeline_template] )
+        
+        print('resulting rendering successfully generated, now uploading the files to ipfs')
+        
     
-    """
-    
-    laz_path, fname, dirname = self.get_pointcloud_details_polygon(pointargs=pointargs)
-    filepath = os.getcwd() + self.username + "/datas"
-    os.mkdir(filepath)
-    os.chdir(filepath)
-    
-    # Causes in case if the file has the interrupted downoad.
-    if not os.path.isfile( fname ): 
-        check_call( ["wget", "--user-agent=Mozilla/5.0", laz_path])
-    
-    
-    # Extract it
-    check_call( ["7z", "-y", "x", fname] ) 
-    pipeline_ipfs = self.ipfs_cid
-    self.generate_pdal_pipeline( dirname, pipeline_ipfs, self.username )
-    # run pdal pipeline with the generated json :
-    
-    os.chdir( dirname )
-    ## here the laz filename is written based on the various categories of the pointclouds for the given region        
-    for laz_fname in os.listdir( '.' ):            
+
+    def fetch_classification_laz(laz_fname):
+        """
+        function that takes in the laz_filename and then sets the WKT flag,
+        NOTE: this was the solution for the lidarhd files as some of them are not implemented.
+        param        
+        """
         f = open( laz_fname, 'rb+' )
+        lasfile = laspy.open(laz_fname)
+        crs = lasfile.header
         f.seek( 6 )
         f.write( bytes( [17, 0, 0, 0] ) )
         f.close()
-    ## now running the command to generate the 3d tile from the stored pipeline 
-    pipeline_template = self.pipeline_file 
-    check_call( ["pdal", "pipeline",pipeline_template] )
-    
-    print('resulting rendering successfully generated, now uploading the files to ipfs')
 
-    def fetch_classification_laz(coordinates,laz_fname):
+
+
+class CroppingUtilsLas():
+    """
+    class consisting of functions to run functions to crop the pointcloud from the lasfile 
+    
+    """
+    
+    def __init__(self, las_file_path):
+        self.las_file_path = las_file_path
+        self.las_file_object = laspy.read(las_file_path)
+        self.pd_file = pd.DataFrame()
+        
+    def scaled_dimensions(self):
+        pass
+        
+        
+    def fetch_header_parameters(self):
         """
-        function that takes in the
-        coordinates (2 in case of point cropping or 4 in case of the polygon cropping) 
-        
-        and then defines the categorisation
-        for the given region boundation.
-        
-        This checks for the shp and corresponding proj file to define the parameters.
+        fetches all the parameters of the las header
         
         """
-        ## checks for the nature of the laz_classification files:
-        if len(coordinates) == 2:
-            ## here the laz filename is written based on the various categories of the pointclouds for the given region        
-            f = open( laz_fname, 'rb+' )
-            lasfile = pylas.read('input.laz')
-            crs = lasfile.header
-            shape_projected = shapefile
-            # f.seek( 6 )
-            # f.write( bytes( [17, 0, 0, 0] ) )
-            # f.close()
+        
+        return self.las_file_object.header
+        
+        
+    

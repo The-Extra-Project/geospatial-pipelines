@@ -1,8 +1,12 @@
 from open3d import io, geometry, data
 
 class PointCloud3D():
+  """
+  class to read and operate on the pointcloud datasets taken from hand held devices (meaning from volumetric scans unlike the lidar scans from air).
+  it can be input from post colmap photo recalibration + NeRF reconstruction for eg.    
+  """
   stored_pcd_dataset_path:str
-  def __init__(self, pcd_dataset_path, ):
+  def __init__(self, pcd_dataset_path):
     self.stored_pcd_dataset_path = pcd_dataset_path
     self.stored_model: data.Dataset
 
@@ -44,7 +48,7 @@ class PointCloud3D():
       """
       this combines another point cloud with the current pcd being evaluated.
       the pcd_2 needs isalligned with the current pointcloud for uniform combination.
-      voxel_size is the 
+      voxel_size is the size of the point that you want to generate in the final format.
       """
       pcd_combined = geometry.PointCloud()
       for point_id in range(len(pcd_2)):
@@ -52,5 +56,4 @@ class PointCloud3D():
         pcd_combined += self.stored_model[point_id]
       pcd_combined_down = pcd_combined.voxel_down_sample(voxel_size=voxel_size)
       io.write_point_cloud(final_name, pcd_combined_down)
-
-
+      
