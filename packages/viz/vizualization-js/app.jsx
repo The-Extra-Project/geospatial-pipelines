@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { createRoot } from "react-dom/client";
-import { DeckGL, COORDINATE_SYSTEM } from "@deck.gl/core";
+import { Deck ,COORDINATE_SYSTEM } from "@deck.gl/core";
 import { PointCloudLayer } from "@deck.gl/layers";
 import { Card, Button, Slider, } from "@mui/material"
-const test_file_vizualition = "../"
-
+const test_file_vizualition = "./LHD_FXX_0633_6867_PTS_C_LAMB93_IGN69.copc.laz"
 import { PLYLoader } from "@loaders.gl/ply"
+import {Tiles3DLoader} from "@loaders.gl/3d-tiles"
+
 const transitionInterpolator = new LinearInterpolator(['rotationOrbit']);
 
 const INITIAL_VIEW_STATE = {
@@ -22,12 +23,20 @@ const INITIAL_CONTROL_SET = {
     Zoom: 10
 }
 
-
-const LAZ_SAMPLE = {
+const deckLayer = new Deck({
+initialViewState:  {    
+longitude: 122.45,
+latitude: 37.78,
+zoom: 12
 
 }
+// controller: true,
+// layers: [
+//     new ScatterplotLayer(self.)
+// ]
 
-
+},
+)
 
 function displayOptionBox() {
     return (

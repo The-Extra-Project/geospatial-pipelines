@@ -1,0 +1,10 @@
+[
+    {
+        "type":"readers.copc",
+        "filename":"LHD_FXX_0633_6867_PTS_C_LAMB93_IGN69.copc.laz"
+    },
+    {
+        "type":"writers.las",
+        "filename":"LHD_FXX_0633_6867_PTS_C_LAMB93_IGN69.las"
+    }
+]

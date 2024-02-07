@@ -125,26 +125,6 @@ export class LighthouseStorageAPI {
         )
         fs.createWriteStream(filenamePATH).write(Buffer.from(decryptedData))
     }
-    // /**
-    //  * @abstract allows user to developer the MPC wallet  with given key shares (as node participants from the lighthouse infrastructure). 
-    //  * by the consortium of the participants in order to combine the shards and create signatures in situ.
-    //  * @param _threshold is the minimum number of the  participants that are needed in order to 
-    //  * @param keyCount corresponds to the number of shards that the user wants to generate.
-    //  */
-    // async generateMPCWallet(_threshold, keyCount ) {
-    //     try {
-    //     this.mpcWallet = generate(
-    //          _threshold,
-    //          keyCount
-    //     )
-    //     }
-    //     catch(e) {
-    //         if(e instanceof Error) {
-    //             console.error(e)
-    //         }
-    //     }
-        
-    // }
 
     /** 
      * function that gives the response whether a given file CID is stored on the filecoin network is authenticated verified or not.
@@ -173,6 +153,8 @@ export class LighthouseStorageAPI {
         console.log('Document Verified:', pieceCID);
         return true;
     }
+
+
 }
 
 
