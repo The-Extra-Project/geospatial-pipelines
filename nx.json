@@ -5,19 +5,16 @@
         "dependsOn": [
           "^build"
         ]
-      },
+      }
+    },
+      "projects": {
+        "data_preparation": {"tags": []}
+        },
       "lint": {
         "cache": true
-      },
-      "test": {
-        "cache": true
-      },
-      "e2e": {
-        "cache": true
-      }
     },
     "installation": {
       "version": "17.2.8"
     }
-  }
+}
   
