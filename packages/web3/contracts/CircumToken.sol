@@ -3,12 +3,8 @@
 pragma solidity ^0.8.5;
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import "./interface/ICircumToken.sol";
 
-
-struct IndividualContribution {
-uint clientContribution; // parameter that corresponds to the number of point clouds generated in the reconstructed model
-uint reallignmentParameter; // this is defined by the colmap for images in order to insure that whether the 
-}
 
 contract CircumToken is ERC20, AccessControl {
     mapping (address=>uint256) tokenMinted;
