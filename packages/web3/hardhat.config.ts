@@ -1,5 +1,4 @@
 import { HardhatUserConfig } from "hardhat/config";
-import "@nomicfoundation/hardhat-toolbox";
 import "@chainlink/hardhat-chainlink"
 
 // taking description from the chainlink hardhat function template deployments.
@@ -121,26 +120,7 @@ export const network_params =  {
     donId: "fun-arbitrum-mainnet-1",
     gatewayUrls: ["https://01.functions-gateway.chain.link/", "https://02.functions-gateway.chain.link/"],
   },
-  arbitrumSepolia: {
-    url: process.env.ARBITRUM_SEPOLIA_RPC_URL || "UNSET",
-    gasPrice: undefined,
-    nonce: undefined,
-    accounts,
-    verifyApiKey: process.env.ARBISCAN_API_KEY || "UNSET",
-    url: process.env.ARBITRUM_SEPOLIA_RPC_URL || "UNSET",
-    accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
-    chainId: 421614,
-    confirmations: DEFAULT_VERIFICATION_BLOCK_CONFIRMATIONS,
-    nativeCurrencySymbol: "ETH",
-    linkToken: "0xb1D4538B4571d411F07960EF2838Ce337FE1E80E",
-    linkPriceFeed: "0xccAE8A015754a64f379550146360bDbAEc757D77", // LINK/ETH
-    functionsRouter: "0x1e531A9635741Ee668114E5EeF039aC086265d5e",
-    donId: "fun-arbitrum-sepolia-1",
-    gatewayUrls: [
-      "https://01.functions-gateway.testnet.chain.link/",
-      "https://02.functions-gateway.testnet.chain.link/",
-    ],
-  },
+  
   // localFunctionsTestnet is updated dynamically by scripts/startLocalFunctionsTestnet.js so it should not be modified here
   localFunctionsTestnet: {
     url: "http://localhost:8545/",

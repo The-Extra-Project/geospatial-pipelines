@@ -5,8 +5,6 @@ import { MinEthersFactory } from "../typechain-types/common"
 import { HardhatEthersHelpers } from "hardhat/types"
 //const contractFactoryCircum = ethers.getContractFactory("CircumToken")
 
-
-
 class tokenContractAPI {
     CircumToken: Promise<CircumToken>
     circumTokenAddress: typeof ethers.constants.AddressZero

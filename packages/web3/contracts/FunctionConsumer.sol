@@ -14,7 +14,7 @@ contract FunctionConsumer is AccessControl, ConfirmedOwner, FunctionsClient {
     bytes32 public s_lastRequestId;
     bytes public s_lastResponse;
     bytes public s_lastError;
-
+    bytes32 _donId;
     bytes32 constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     constructor(
@@ -22,7 +22,7 @@ contract FunctionConsumer is AccessControl, ConfirmedOwner, FunctionsClient {
         bytes32 donId,
         address _admin
     ) FunctionsClient(router) ConfirmedOwner(msg.sender) {
-        donId = donId;
+        _donId = donId;
         grantRole(ADMIN_ROLE, _admin);
     }
 
@@ -36,13 +36,11 @@ contract FunctionConsumer is AccessControl, ConfirmedOwner, FunctionsClient {
             hasRole(ADMIN_ROLE, msg.sender),
             "FunctionConsumer: Sender must be admin"
         );
-        donId = newDonId;
+        _donId = newDonId;
     }
 
     /// @notice This function sets the function call to the circumToken as defined by the user
     /// @dev this has to be called buy the keeper held by the admin wallet.
-
-    /// @param Documents
     ///    @param source JavaScript source code
     ///   * @param secretsLocation Location of secrets (only Location.Remote & Location.DONHosted are supported)
     ////   * @param encryptedSecretsReference Reference pointing to encrypted secrets
@@ -50,9 +48,7 @@ contract FunctionConsumer is AccessControl, ConfirmedOwner, FunctionsClient {
     ////   * @param bytesArgs Bytes arguments passed into the source code and accessible via the global variable `bytesArgs` as hex strings
     ////   * @param subscriptionId Subscription ID used to pay for request (FunctionsConsumer contract address must first be added to the subscription)
     ////   * @param callbackGasLimit Maximum amount of gas used to call the inherited `handleOracleFulfillment` method
-
-    /// @return Documents the return variables of a contract’s function state variable
-    /// @inheritdoc	Copies all missing tags from the base function (must be followed by the contract name)
+    //// @return gives the requestId of the given function request.
 
     function sendFunctionRequest(
         string calldata source,
@@ -86,7 +82,7 @@ contract FunctionConsumer is AccessControl, ConfirmedOwner, FunctionsClient {
             req.encodeCBOR(),
             subscriptionId,
             callbackGasLimit,
-            donId
+            _donId
         );
 
         return s_lastRequestId;

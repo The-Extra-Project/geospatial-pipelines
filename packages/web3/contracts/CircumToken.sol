@@ -5,7 +5,6 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import "./interface/ICircumToken.sol";
 
-
 contract CircumToken is ERC20, AccessControl {
     mapping (address=>uint256) tokenMinted;
     mapping(address => IndividualContribution) contributionMetrics;
