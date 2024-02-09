@@ -5,20 +5,18 @@ script that uses the python bindings of nerfstudio and colmap in order to:
 
 CREDITS: the code here is taken from the sdfstudio process_data:  https://github.com/autonomousvision/sdfstudio/blob/master/scripts/process_data.py#L33
 """
-
-
-from typing import Any
-from read_write_model import read_model
+from data_preparation.cameras.colmap.scripts.python.read_write_model import read_model
 
 from nerfstudio.process_data import (
-    colmap_utils, hloc_utils, polycam_utils, record3d_utils, process_data_utils
+    colmap_utils, hloc_utils, process_data_utils
 )
+
 import sys
 import plotly.graph_objs as go
 
 from nerfstudio.utils import install_checks
+
 import matplotlib.pyplot as plt
-#import pycolmap
 import cv2
 from subprocess import check_call
 import os
@@ -32,20 +30,19 @@ from collections import OrderedDict
 import torch
 import numpy as np
 
-
-
 @dataclass
 class ColmapDataParsing():
     """
-    filepath: is the ciurrent folder path for the given images / videos
+    filepath: is the current folder path for the given images / videos
     type: 0 for the image and 1 for photos that are decked.
     """
     datafolder:pathlib.Path
     datatype:int ## whether its an video (0) or an image(1)
     output_dir:pathlib.Path ## stores the output images (that are recalibrated).
-    def __init__(self,filepath, type):
-        datafolder = filepath
-
+    def __init__(self,filepath, output_dir):
+        self.datafolder = filepath
+        self.output_dir = output_dir
+        
     def fetch_frame(self,downsampling_rate, count):  
         video = cv2.VideoCapture(self.datafolder)
         video.set(cv2.CAP_PROP_POS_MSEC, downsampling_rate * 1000)
@@ -53,7 +50,6 @@ class ColmapDataParsing():
         if frame:
             cv2.imwrite(os.absself.filepath+"filepath_ds_" + downsampling_rate + str(count) + ".jpg",image)
         return frame
-
     def convert_video_to_photo(self, downsampling_rate):
         """
         using opencv in order to slicing the images from the video.
@@ -70,12 +66,13 @@ class ColmapDataParsing():
             sec += frameRate
             sec = round(sec,2)
             success = self.fetch_frame(downsampling_rate, count)
-    def get_image_metadata(imagepath):
+    
+    def get_image_metadata(imagepath:str):
         """
         fetches the metadata from the frames in order to get the geolocation of the given frame and fetch the corresponding geolocal information
         NOTE: this needs to be enabled by the mobile or device that is capturing the image/video in order to fetch the corresponding GPS information.
         """
-        img = Image.open("test_image_1.JPG")
+        img = Image.open(imagepath)
         exif = {
             ExifTags.TAGS[k]: v
             for k,v in img.getexif().items()
@@ -86,8 +83,7 @@ class ColmapDataParsing():
         ## first defining the various path of image operation
         mvs_path = self.output_dir / "mvs"
         database_path = self.output_dir / "database.db"
-        
-        
+ 
         check_call(["colmap", 
                     "feature_extractor", "--database_path=${database_path}", 
                     "-image_path=${database_path}/images_raw",
@@ -103,8 +99,7 @@ class ColmapDataParsing():
                     "--database_path=database.db",
                     "--SiftMatching.use_gpu=true"            
                     ])
-        
-        
+
         os.mkdir(self.filepath + "/sparse")
         
         check_call([
@@ -303,7 +298,6 @@ class ColmapDataParsing():
         return homogenise_coord @ pose.transform(-1,-2) 
 
 presentation_console = Console(width=120)
-
 
 """
     class to parse the video / image of the clients to nerfstudio for image reallignment.

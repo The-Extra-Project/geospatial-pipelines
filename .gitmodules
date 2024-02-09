@@ -10,3 +10,6 @@
 [submodule "packages/surface_reconstruction/lib/PoissonRecon"]
 	path = packages/surface_reconstruction/lib/PoissonRecon
 	url = https://github.com/mkazhdan/PoissonRecon.git
+[submodule "packages/data_preparation/cameras/colmap/packages/data_preparation/cameras/colmap"]
+	path = packages/data_preparation/cameras/colmap/packages/data_preparation/cameras/colmap
+	url = https://github.com/colmap/colmap.git
