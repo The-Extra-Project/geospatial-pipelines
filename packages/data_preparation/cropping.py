@@ -18,7 +18,7 @@ import pandas as pd
 from subprocess import check_call
 import shutil
 import shapefile
-from llm.pipeline_generation import PDAL_json_generation_template
+from pdal.pipeline_generation import PDAL_template_manual
 import pycrs
 import geopandas as gpd
 
@@ -268,7 +268,6 @@ class CroppingUtilsSHP():
         f.close()
 
 
-
 class CroppingUtilsLas():
     """
     class consisting of functions to run functions to crop the pointcloud from the lasfile 
@@ -280,17 +279,65 @@ class CroppingUtilsLas():
         self.las_file_object = laspy.read(las_file_path)
         self.pd_file = pd.DataFrame()
         
-    def scaled_dimensions(self):
-        pass
-        
-        
-    def fetch_header_parameters(self):
+    def scaled_dimensions(self, Xinit, Yinit, Zinit, las_headers):
         """
-        fetches all the parameters of the las header
+        function for providing the correct and normalized coordinates based up on the las header details 
+        XInit, Yinit and Zinit: is the initial coordinates tha are to be scaled
+        las_header is the header information that are 
+        """
+        X_coord = (Xinit * las_headers['x_scale'][0]) + las_headers['x_offset'][0],
+        Z_coord = (Zinit * las_headers["z_scale"][0]) + las_headers["z_offset"][0],
+        Y_coord= (Yinit * las_headers["y_scale"][0]) + las_headers["y_offset"][0],
+        return X_coord,Y_coord,Z_coord
+        
+    def fetch_header_parameters(self, lidar_file_path):
+        """
+        This function reads the las file header and returns the parameters as a dictionary
+        """
+        params = []
+        with laspy.open(lidar_file_path) as fh:
+            print(f"file details: major-version: {fh.header.major_version}")
+            params = {
+                
+                    "x_min" : fh.header.x_min,
+                    "x_max" : fh.header.x_max,
+                    "x_scale" : fh.header.x_scale,
+                    "x_offset" : fh.header.x_offset,
+                    "y_min" : fh.header.y_min,
+                    "y_max" : fh.header.y_max,
+                    "y_scale" : fh.header.y_scale,
+                    "y_offset" : fh.header.y_offset,
+                    "z_min" : fh.header.z_min,
+                    "z_max" : fh.header.z_max,
+                    "z_scale" : fh.header.z_scale,
+                    "z_offset" : fh.header.z_offset,
+                }
+            
+            return pd.DataFrame(params, index=[0])      
+        
+    async def pdal_cropping_pipeline():
+        """
+        Generating the cropping transformation json file using the description template defined by the openai to the user teamplate . 
         
         """
-        
-        return self.las_file_object.header
-        
-        
-    
+        try:
+            pdal_object = PDAL_template_manual()
+            
+            
+            print("the application is finally generated: " + os.path.join('.', "transform_cropping.json"))
+            assert os.path.isfile("transform_cropping.json") is True
+            check_call(["pdal", "pipeline", "transform_cropping.json"])
+            assert os.path.isfile("cropped.laz") is True
+        except Exception as e:
+            print("under the pdal_pipeline_processing, the following error:  " + str(e))
+            
+    def scaling_parameters(x,y,z, df_init):
+        """
+        fetches all the sides of the X,Y,Z axis and returns them as a dictionary
+        df_init is the value of the header information of the las file stored.  
+        """    
+        #if (x + df_init['x_scale'][0]) > df_init['']     
+        X_coord = (x * df_init['x_scale'][0]) + df_init['x_offset'][0],
+        Z_coord = (z * df_init["z_scale"][0]) + df_init["z_offset"][0],
+        Y_coord= (y * df_init["y_scale"][0]) + df_init["y_offset"][0],
+        return X_coord,Y_coord,Z_coord
