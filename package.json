@@ -4,10 +4,10 @@
     "description": "package to run data acquisition, transformation and reconstruction operations and rendering on pointcloud or imagery datasets to generate 3D maps",
     "main": "",
     "directories": {
-        "test": "test"
+        "packages": "packages/**"
     },
     "scripts": {
-        "test": ""
+        "prettier:ts": " prettier  **/*.ts"
     },
     "keywords": [
         "point_cloud_data"

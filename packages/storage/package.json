@@ -4,7 +4,10 @@
     "description": "pakcage for scripts that want to integrate functionality of storing / retrieving the datasets for various operations",
     "main": "index.ts",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "jest test/storageTest.spec.ts",
+        "build": "npx tsc",
+        "dev": "nodemon  test/server.ts",
+        "start": "node dist/test/server.js"
     },
     "keywords": [
         "web3",
@@ -15,14 +18,21 @@
     "dependencies": {
         "@lighthouse-web3/kavach": "^0.1.5",
         "@lighthouse-web3/sdk": "^0.3.0",
+        "@types/express": "^4.17.21",
+        "alchemy-sdk": "^3.1.2",
+        "body-parser": "^1.20.2",
         "dotenv": "^16.3.1",
-        "ethers": "^6.10.0",
-        "kavach": "^1.0.0-next.6"
+        "ethers": "5.7.2",
+        "express": "^4.18.2",
+        "kavach": "^1.0.0-next.6",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.3.3"
     },
     "devDependencies": {
         "@types/jest": "^29.5.11",
         "@web3-storage/w3up-client": "^12.1.0",
         "jest": "^29.7.0",
-        "jsonwebtoken": "^9.0.2"
+        "jsonwebtoken": "^9.0.2",
+        "nodemon": "^3.0.3"
     }
 }

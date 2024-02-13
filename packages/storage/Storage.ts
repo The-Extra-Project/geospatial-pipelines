@@ -5,45 +5,47 @@
 
 import lighthouse from '@lighthouse-web3/sdk'
 import {apiKeyResponse} from '@lighthouse-web3/sdk/dist/Lighthouse/getApiKey'
-import dotenv from 'dotenv'
 //import { getAccessCondition, generate, accessControl } from '@lighthouse-web3/kavach'
 import {ethers} from 'ethers'
 import kavach from "@lighthouse-web3/kavach"
 import {sign} from "jsonwebtoken"
 import fs from "fs"
 import axios from "axios"
+import dotenv from "dotenv"
 
 /**
  * class that implements functionality with lighthouse to fetch, store or instantiate the deal for storage etc.
- * NOTE: there services are now payable and capped till certain range based on the 
+ * NOTE: there services are now payable and capped till certain range.
  * 
  */
 
-dotenv.config()
-
+dotenv.config(
+    {
+        path: '.env'
+    }
+)
 
 export class LighthouseStorageAPI {
     userId: string
     lighthouseWallet: ethers.Wallet
     pubKey: string
-    private provider?: ethers.Provider
-    private apiKey: Promise<apiKeyResponse>
+    private provider?: any
+    private apiKey: string
     baseURL: string // the backend uri for the user in order to get access to their gateway. user needs to setup their API key in order to get started.
     /**
      * @param userdetails are the current owner that wants to operate on the dataset (which is usually admin). 
      * NOTE: based on the various operations (client bidding successfully for the dataset ) will replace the current owner
      * @param password are the credential for opening the dataset.
      */
-    constructor(userdetails, _pubKey, provider?: ethers.Provider, priv_key?: string) {
+    constructor(userdetails, _pubKey, provider?: any, priv_key?: string) {
         this.userId = userdetails
         this.pubKey = _pubKey
         this.provider = provider
         this.lighthouseWallet = new ethers.Wallet(process.env.PRIV_KEY || priv_key || '')
         this.baseURL = 'https://api.lighthouse.storage/api/'
-        this.apiKey = this.getAPIKey(process.env.PRI_KEY || priv_key) 
-
-
+        this.apiKey = process.env.API_KEY 
     }
+
 
     /**
      * 
@@ -52,7 +54,7 @@ export class LighthouseStorageAPI {
      */
 
     private async getAPIKey(privKey): Promise<apiKeyResponse> {
-        const wallet = {publicKey: this.pubKey , privateKey: privKey || process.env.PRIV_KEY }
+        const wallet = {publicKey: this.pubKey , privateKey: privKey || process.env.API_KEY }
 
         const verificationMesg = (await axios.get(this.baseURL + `auth/get_message?publicKey?=${wallet.publicKey}`)).data
 
@@ -69,7 +71,7 @@ export class LighthouseStorageAPI {
     async uploadDatasetEncrypted(filepath) {
 
         const signedMessage = async () => {
-            const provider = new ethers.JsonRpcProvider(process.env.URI)
+            const provider = new ethers.providers.JsonRpcProvider(process.env.URI)
             const authMessage = await kavach.getAuthMessage(this.lighthouseWallet.address)
             const signedMessage = await this.lighthouseWallet.signMessage(authMessage.message as string)
             const { JWT, error } = await kavach.getJWT(this.lighthouseWallet.address, signedMessage)
@@ -90,8 +92,8 @@ export class LighthouseStorageAPI {
      * @param delegatedWallet is the address of the wallet that gets the address.
      * @param cid is the address that corresponds to the various wallets for getting 
      */
-    async transferOwnership(newOwner, cid, delegatedWallet) {
-        const generateAuthToken = async (delegatedWallet): Promise<string> => {
+    async transferOwnership(newOwner: string, cid: string, delegatedWallet: any) {
+        const generateAuthToken = async (delegatedWallet: string): Promise<string> => {
             return (sign(
                 {
                     payload: this.lighthouseWallet
@@ -105,7 +107,7 @@ export class LighthouseStorageAPI {
         await kavach.revokeAccess(newOwner, cid, await generateAuthToken(delegatedWallet), delegatedWallet)
     }
 
-    async authMessage(publicKey): Promise<string> {
+    async authMessage(publicKey: string): Promise<string> {
         //const signer = new ethers.Wallet(process.env.PRIV_KEY || '', this.provider)
         const messageRequested = (await lighthouse.getAuthMessage(publicKey)).data.message
         const signedMessage = await this.lighthouseWallet.signMessage(messageRequested)
@@ -113,7 +115,7 @@ export class LighthouseStorageAPI {
     }
 
     async decryptFile(
-        cid_file, publicKey, filenamePATH
+        cid_file: string, publicKey: string, filenamePATH: string
     ) {
         let authMessage = await this.authMessage(publicKey)
         let fileEncryptionKey = await lighthouse.fetchEncryptionKey(

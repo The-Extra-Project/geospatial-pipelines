@@ -6,10 +6,6 @@ import { ethers } from "ethers"
 import {expect, it, describe} from '@jest/globals';
 
 
-const url = ""
-
-
-
 // {
 //   data: [
 //     {
@@ -19,7 +15,7 @@ const url = ""
 //     }
 //   ]
 // }
-const provider =  new ethers.AlchemyProvider('Mumbai', `${process.env.API_KEY_ALCHEMY}`)
+const provider =  new ethers.providers.AlchemyProvider('Mumbai', `${process.env.API_KEY_ALCHEMY}`)
 
 const user1 = new LighthouseStorageAPI('abc@gmail.com','0x81477cF7AB5Ed1eD309cc2640C4474EC38855046', provider,'0x')
 const user2 = new LighthouseStorageAPI('def@gmail.com', '0xbADEeA5fA6462Aaeb5c37586312bC0d5C62074F3', provider, '0x')
