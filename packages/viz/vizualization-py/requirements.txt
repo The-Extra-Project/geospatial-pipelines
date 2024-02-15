@@ -1,0 +1,3 @@
+streamlit
+geospatial-pipelines==0.1.0
+streamlit-extras
