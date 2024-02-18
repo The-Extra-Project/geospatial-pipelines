@@ -5,3 +5,13 @@ This package provides the tools and utils for the first stage of the operation a
     - conversion of the coordinates 
     - combination of point clouds
     - conversion across various formats.
+
+## installation and setup:
+- Install from the pip directory: `pip install -r requirements.txt`
+- Or via the source by cloning the whole [geospatial-pipeline]() and then installing the file via the `pip install -r requirements.txt`.
+
+
+## Various packages:
+--------------- ------------
+| package_file | usecases |
+

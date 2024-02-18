@@ -2,7 +2,6 @@
 script that uses the python bindings of nerfstudio and colmap in order to:
 - Pull and parse the images for the correction on colmap.
 - running the colmap operations for the image recalibration along with other operation.
-
 CREDITS: the code here is taken from the sdfstudio process_data:  https://github.com/autonomousvision/sdfstudio/blob/master/scripts/process_data.py#L33
 """
 from data_preparation.cameras.colmap.scripts.python.read_write_model import read_model

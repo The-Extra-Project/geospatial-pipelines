@@ -1,7 +1,7 @@
 import sys
 sys.path.append("../../")
 from data_preparation.pdal.pipeline_generation import PDAL_template_manual
-from data_preparation.cropping import CroppingUtilsLas
+from packages.data_preparation.data_preparation.cropping import CroppingUtilsLas
 from subprocess import check_call
 from shapely.geometry import  Point
 from pyproj import Transformer

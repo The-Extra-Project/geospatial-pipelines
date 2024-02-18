@@ -8,6 +8,8 @@ pyshp
 pycrs
 pylas
 nerfstudio
-pycolmap
+pycolmap==0.6.1
 opencv-python
 tyro
+pytest
+rasterio

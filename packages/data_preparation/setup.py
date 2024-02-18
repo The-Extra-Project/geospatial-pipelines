@@ -7,14 +7,17 @@ def read(filename):
     return file.read()
 
 setup(
-    name='geospatial-pipelines',
+    name='pointcloud_extraction_toolkit',
     author="Dhruv Malik",
-    version='0.1.0',
+    version='0.0.3',
     author_email="dhruv@extralabs.xyz",
+    include_package_data=True,
     description="scripts for allowing user to load and preprocess data from the lidar / image data in order to convert into raw attributed point cloud dataset",
     long_description=read('README.md'),
     long_description_content_type="text/markdown",
     packages=find_packages(),
+    package_dir={'', '.'},
+    py_modules=['data_preparation.cameras', 'data_preparation.pdal', 'data_preparation.cropping', 'data_preparation.threed_pointcloud'],
     classifiers=[
     'Programming Language :: Python :: 3',
     'License :: OSI Approved :: MIT License',
