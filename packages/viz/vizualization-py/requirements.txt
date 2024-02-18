@@ -1,3 +1,4 @@
 streamlit
-geospatial-pipelines==0.1.0
+geospatial-pipelines
 streamlit-extras
+python-dotenv

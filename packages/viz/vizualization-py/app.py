@@ -10,17 +10,12 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.header("Circum protocol steps")
-
-
-def set_button_state(button):
-    """Maintains the state value of the result of the various functions that generate the result"""
-    st.session_state.clicked[button] = True
+st.header("Circum protocol")
 
 def is_tool(name):
     """Checks if a tool is installed."""
     return which(name) is not None
-
+    
 
 def upload_file():
     if not is_tool("w3"):
@@ -28,13 +23,7 @@ def upload_file():
         with st.spinner("Installing w3cli..."):
             subprocess.check_call(["npm", "install", "-g", "@web3-storage/w3cli"])
 
-    upload_method = st.selectbox("Upload method", options=["Lighthouse", "Web3 Storage"])
 
-    if upload_method == "Lighthouse":
-        # TODO: Implement Lighthouse upload
-        st.warning("Lighthouse upload not yet implemented")
-
-    elif upload_method == "Web3 Storage":
         email = st.text_input("Enter your email")
         if button("Login via email", key="email login"):
             try:
