@@ -4,8 +4,8 @@
     "description": "pakcage for scripts that want to integrate functionality of storing / retrieving the datasets for various operations",
     "main": "index.ts",
     "scripts": {
-        "test": "jest test/storageTest.spec.ts",
-        "build": "npx tsc",
+        "test": "jest",
+        "build": "rimraf dist/* && npx tsc",
         "dev": "nodemon  test/server.ts",
         "start": "node dist/test/server.js"
     },
@@ -13,6 +13,7 @@
         "web3",
         "storage"
     ],
+    "type": "commonjs",
     "author": "Dhruv",
     "license": "ISC",
     "dependencies": {
@@ -25,6 +26,8 @@
         "ethers": "5.7.2",
         "express": "^4.18.2",
         "kavach": "^1.0.0-next.6",
+        "rimraf": "^5.0.5",
+        "ts-jest": "^29.1.2",
         "ts-node": "^10.9.2",
         "typescript": "^5.3.3"
     },

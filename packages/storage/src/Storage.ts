@@ -68,7 +68,7 @@ export class LighthouseStorageAPI {
      * @param filepath the file that you want to upload in the lighthouse.
      * @returns the identifier (CID or fielcoin hash storage identifier) for the storage.
      */
-    async uploadDatasetEncrypted(filepath) {
+    async uploadDatasetEncrypted(filepath:string) {
 
         const signedMessage = async () => {
             const provider = new ethers.providers.JsonRpcProvider(process.env.URI)
@@ -77,9 +77,11 @@ export class LighthouseStorageAPI {
             const { JWT, error } = await kavach.getJWT(this.lighthouseWallet.address, signedMessage)
             return (JWT)
         }
-
         try {
-            let uploadObject = await lighthouse.uploadEncrypted(filepath, process.env.API as string, this.pubKey, (signedMessage as unknown) as string)
+            if (filepath.split('.').pop() != ('.xyz' || '.laz') ) { 
+                throw new Error("should be uplaoding the correct format of pointcloud file ")
+            }
+            let uploadObject = await lighthouse.uploadEncrypted(filepath, process.env.API as string, this.pubKey, (signedMessage as unknown) as string)        
             console.log("The file was saved successfully at + " + uploadObject["Hash"] + " along with ownership " + this.userId)
             return uploadObject["Hash"]
         } catch (error) {
@@ -135,9 +137,10 @@ export class LighthouseStorageAPI {
     async verificationProof(cid: string): Promise<boolean> {
         // first getting the proof of data segment inclusion
         let podsi
+        let response
         try 
         {
-        const response = await axios.get(this.baseURL + `get_proof?cid=${cid}`)
+        response = await axios.get(this.baseURL + `get_proof?cid=${cid}`)
         console.log(`getting the data segment proof : %s`, response.data )
         podsi = response.data
         }
@@ -146,8 +149,8 @@ export class LighthouseStorageAPI {
                 console.error(error)
             }
         }
-        const {pieceCID, dealInfo} = podsi
-    
+        const {pieceCID, dealInfo } = podsi
+        
         if (!pieceCID || !dealInfo || dealInfo.length === 0 || !dealInfo.every(deal => deal.dealId && deal.storageProvider)) {
             console.error('Verification Failed');
             return false;
