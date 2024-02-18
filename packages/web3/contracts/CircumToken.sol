@@ -21,8 +21,8 @@ contract CircumToken is ERC20, AccessControl {
         tokenMultiplier = _tokenMultiplier;
         oracleAddress = _oracleAddress;
         keeperAddress = _keeperAddress;
-        grantRole(MINTER_ROLE, _keeperAddress);
-        grantRole(ORACLE_ROLE, oracleAddress);
+        _grantRole(MINTER_ROLE, _keeperAddress);
+        _grantRole(ORACLE_ROLE, oracleAddress);
     }
 
     function addIndividualContribution(address _clientAddress, IndividualContribution memory _contribution)  public returns(bool) {

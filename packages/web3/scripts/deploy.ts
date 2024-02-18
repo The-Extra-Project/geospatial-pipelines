@@ -1,24 +1,27 @@
 import {ethers} from "hardhat";
-import {CircumToken__factory, AccessControl__factory} from "../typechain-types"
 
+let address_outputs : Map<string, string>
 export async function deployContracts() {
-  const oracleAddress = '0x12AE66CDc592e10B60f9097a7b0D3C59fce29876';
-  const evalDeploymentAddress = '0x12AE66CDc592e10B60f9097a7b0D3C59fce29876'; // done after deploying the address.
+  const oracleAddress = '0x36E8895442C8D90419a0a791D117339B78CbB656';
+  const keeperAddress = '0x36E8895442C8D90419a0a791D117339B78CbB656'; 
   const multiplicationFactor = "7"
-  
   const ctFactory = await ethers.getContractFactory("CircumToken")
   const stakingContract = await ethers.getContractFactory("StakingContract")
-  const ctContract  = await ctFactory.deploy(multiplicationFactor, oracleAddress,evalDeploymentAddress)
-
-  await ctContract.waitForDeployment();
+  const ctContract  = await ctFactory.deploy(multiplicationFactor, oracleAddress,keeperAddress)
+  await ctContract.deployed();
   console.log(
     `contract deployed with  address: ` + await ctContract.address
   );
 
+  address_outputs.set("CircumToken: ", ctContract.address)
+  address_outputs.set("StakingContract: ", stakingContract.address)
 
+  const stContract = await stakingContract.deploy(ctContract.address,oracleAddress);
 
-
-
+  await stContract.waitForDeployment();
+  
+  print("Address of token contract",   )
+  return ctContract.address //, stContract.address
 }
 
 deployContracts().catch((error) => {

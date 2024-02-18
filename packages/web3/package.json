@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest",
     "run-function": "ts-node ./chainlink-functions/request.ts",
-    "deploy_token": "hardhat run scripts/deploy.ts"
+    "deploy:token:mumbai": "hardhat run scripts/deploy.ts --network polygonMumbai",
+    "compile": "npx hardhat compile"
   },
   "keywords": [
     "web3",
@@ -19,18 +20,25 @@
     "@chainlink/env-enc": "^1.0.5",
     "@chainlink/functions-toolkit": "^0.2.8",
     "@chainlink/hardhat-chainlink": "^0.0.2",
+    "@cometh/connect-sdk": "^1.2.12",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
     "@openzeppelin/contracts": "^5.0.1",
     "@typechain/ethers-v5": "^11.1.2",
+    "dotenv": "^16.4.2",
     "expressjs": "^1.0.1",
     "hardhat": "^2.19.4",
+    "hardhat-verify": "^1.0.0",
     "ts-node": "^10.9.2",
-    "typechain": "^8.3.2",
     "typescript": "^5.3.3"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
-    "ethers": "^5.7.2"
+    "@nomicfoundation/hardhat-verify": "^2.0.4",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
+    "@types/jest": "^29.5.12",
+    "ethers": "^5.7.2",
+    "typechain": "^8.3.2"
   }
 }

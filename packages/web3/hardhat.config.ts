@@ -1,41 +1,21 @@
 import { HardhatUserConfig } from "hardhat/config";
-import "@chainlink/hardhat-chainlink"
+import "@nomicfoundation/hardhat-ethers"
+import { SolcConfig } from "hardhat/types";
+import "@nomicfoundation/hardhat-verify";
+import {configDotenv} from "dotenv"
 
+configDotenv(
+  {
+    path: '.env'
+
+  }
+)
 // taking description from the chainlink hardhat function template deployments.
 const accounts: any[] = []
 const DEFAULT_VERIFICATION_BLOCK_CONFIRMATIONS = 2
 
 export const network_params =  {
-  ethereum: {
-    url: process.env.ETHEREUM_RPC_URL || "UNSET",
-    gasPrice: undefined,
-    nonce: undefined,
-    accounts,
-    verifyApiKey: process.env.ETHERSCAN_API_KEY || "UNSET",
-    chainId: 1,
-    confirmations: DEFAULT_VERIFICATION_BLOCK_CONFIRMATIONS,
-    nativeCurrencySymbol: "ETH",
-    linkToken: "0x514910771AF9Ca656af840dff83E8264EcF986CA",
-    linkPriceFeed: "0xDC530D9457755926550b59e8ECcdaE7624181557", // LINK/ETH
-    functionsRouter: "0x65Dcc24F8ff9e51F10DCc7Ed1e4e2A61e6E14bd6",
-    donId: "fun-ethereum-mainnet-1",
-    gatewayUrls: ["https://01.functions-gateway.chain.link/", "https://02.functions-gateway.chain.link/"],
-  },
-  avalanche: {
-    url: process.env.AVALANCHE_RPC_URL || "UNSET",
-    gasPrice: undefined,
-    nonce: undefined,
-    accounts,
-    verifyApiKey: process.env.SNOWTRACE_API_KEY || "UNSET",
-    chainId: 43114,
-    confirmations: DEFAULT_VERIFICATION_BLOCK_CONFIRMATIONS,
-    nativeCurrencySymbol: "AVAX",
-    linkToken: "0x5947BB275c521040051D82396192181b413227A3",
-    linkPriceFeed: "0x1b8a25F73c9420dD507406C3A3816A276b62f56a", // LINK/AVAX
-    functionsRouter: "0x9f82a6A0758517FD0AfA463820F586999AF314a0",
-    donId: "fun-avalanche-mainnet-1",
-    gatewayUrls: ["https://01.functions-gateway.chain.link/", "https://02.functions-gateway.chain.link/"],
-  },
+
   polygon: {
     url: process.env.POLYGON_RPC_URL || "UNSET",
     gasPrice: undefined,
@@ -50,24 +30,6 @@ export const network_params =  {
     functionsRouter: "0xdc2AAF042Aeff2E68B3e8E33F19e4B9fA7C73F10",
     donId: "fun-polygon-mainnet-1",
     gatewayUrls: ["https://01.functions-gateway.chain.link/", "https://02.functions-gateway.chain.link/"],
-  },
-  ethereumSepolia: {
-    url: process.env.ETHEREUM_SEPOLIA_RPC_URL || "UNSET",
-    gasPrice: undefined,
-    nonce: undefined,
-    accounts,
-    verifyApiKey: process.env.ETHERSCAN_API_KEY || "UNSET",
-    chainId: 11155111,
-    confirmations: DEFAULT_VERIFICATION_BLOCK_CONFIRMATIONS,
-    nativeCurrencySymbol: "ETH",
-    linkToken: "0x779877A7B0D9E8603169DdbD7836e478b4624789",
-    linkPriceFeed: "0x42585eD362B3f1BCa95c640FdFf35Ef899212734", // LINK/ETH
-    functionsRouter: "0xb83E47C2bC239B3bf370bc41e1459A34b41238D0",
-    donId: "fun-ethereum-sepolia-1",
-    gatewayUrls: [
-      "https://01.functions-gateway.testnet.chain.link/",
-      "https://02.functions-gateway.testnet.chain.link/",
-    ],
   },
   polygonMumbai: {
     url: process.env.POLYGON_MUMBAI_RPC_URL || "UNSET",
@@ -87,39 +49,7 @@ export const network_params =  {
       "https://02.functions-gateway.testnet.chain.link/",
     ],
   },
-  avalancheFuji: {
-    url: process.env.AVALANCHE_FUJI_RPC_URL || "UNSET",
-    gasPrice: undefined,
-    nonce: undefined,
-    accounts,
-    verifyApiKey: process.env.FUJI_SNOWTRACE_API_KEY || "UNSET",
-    chainId: 43113,
-    confirmations: DEFAULT_VERIFICATION_BLOCK_CONFIRMATIONS,
-    nativeCurrencySymbol: "AVAX",
-    linkToken: "0x0b9d5D9136855f6FEc3c0993feE6E9CE8a297846",
-    linkPriceFeed: "0x79c91fd4F8b3DaBEe17d286EB11cEE4D83521775", // LINK/AVAX
-    functionsRouter: "0xA9d587a00A31A52Ed70D6026794a8FC5E2F5dCb0",
-    donId: "fun-avalanche-fuji-1",
-    gatewayUrls: [
-      "https://01.functions-gateway.testnet.chain.link/",
-      "https://02.functions-gateway.testnet.chain.link/",
-    ],
-  },
-  arbitrum: {
-    url: process.env.ARBITRUM_RPC_URL || "UNSET",
-    gasPrice: undefined,
-    nonce: undefined,
-    accounts,
-    verifyApiKey: process.env.ARBISCAN_API_KEY || "UNSET",
-    chainId: 42161,
-    confirmations: DEFAULT_VERIFICATION_BLOCK_CONFIRMATIONS,
-    nativeCurrencySymbol: "ETH",
-    linkToken: "0xf97f4df75117a78c1A5a0DBb814Af92458539FB4",
-    linkPriceFeed: "0xb7c8Fb1dB45007F98A68Da0588e1AA524C317f27", // LINK/ETH
-    functionsRouter: "0x97083E831F8F0638855e2A515c90EdCF158DF238",
-    donId: "fun-arbitrum-mainnet-1",
-    gatewayUrls: ["https://01.functions-gateway.chain.link/", "https://02.functions-gateway.chain.link/"],
-  },
+
   
   // localFunctionsTestnet is updated dynamically by scripts/startLocalFunctionsTestnet.js so it should not be modified here
   localFunctionsTestnet: {
@@ -133,13 +63,31 @@ export const network_params =  {
   },
 }
 
-const config: HardhatUserConfig = {
-  solidity: "0.8.20",
+const config: HardhatUserConfig | SolcConfig = {
+  solidity: "0.8.24",
 
   networks: {
     ...network_params
+  },
+  settings: {
+    viaIR: true
+  },
+
+  etherscan: {
+    apiKey: process.env.POLYGONSCAN_API_KEY || ''
+  },
+  sourcify: {
+    enabled: true
+  },
+
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts"
   }
 
+  
 };
 
 

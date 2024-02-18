@@ -100,7 +100,7 @@ contract DataCollateralVault is ERC20 {
         uint totalStaked = 0;
         for (uint i = 0; i < _providers.length; i++) {
            totalStaked += _stakedShares[ipfs_dataset_id][_providers[i]];
-           _transfer( _stakedShares[ipfs_dataset_id][_providers[i]] , msg.sender, totalStaked);
+           _transfer(address(this), msg.sender, _stakedShares[ipfs_dataset_id][_providers[i]] );
             }
             
             

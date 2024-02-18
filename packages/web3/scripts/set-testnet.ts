@@ -4,10 +4,13 @@ import * as fs from "fs";
 import { startLocalFunctionsTestnet } from "@chainlink/functions-toolkit";
 import { utils, Wallet } from "ethers";
 import { config } from "@chainlink/env-enc";
-import EncryptedEnv from "@chainlink/env-enc/dist/EncryptedEnv";
+import * as envConfig from "@chainlink/env-enc/dist/EncryptedEnv";
 
+//import {dotenv} from "dotenv"
 // Load environment variables from .env.enc file (if it exists)
-const envConfig: EncryptedEnv = require("../.env.enc");
+const envConfig: encryptedEnc = require("../.env.enc");
+
+envConfig.load();
 
 (async () => {
   const requestConfigPath = path.join(process.cwd(), "functions-request-config.js"); // @dev Update this to point to your desired request config file
