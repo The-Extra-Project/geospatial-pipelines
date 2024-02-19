@@ -13,4 +13,4 @@ from data_preparation.pdal.pipeline_generation import PDAL_json_generation_templ
 from packages.data_preparation.data_preparation.cropping import CroppingUtilsLas, CroppingUtilsSHP
 from data_preparation.threed_pointcloud import PointCloud3D
 
-from rasterisation import RasterDataTransformation
+from packages.data_preparation.data_preparation.rasterisation import RasterDataTransformation

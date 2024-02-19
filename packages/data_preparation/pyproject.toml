@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+
+[project.scripts]
+colmap = "data_preparation.cameras.utils:ColmapDataParsing"
+nerfstudio = "data_preparation.cameras.utils:NerfStudioCameraUtils"
+pdal = "data_preparation.pdal.pipeline_generation:PDAL_template_manual"
+cropping = "data_preparation.cropping:CroppingUtilsSHP"
+rasterisation = "data_preparation.rasterisation:RasterDataTransformation"
+threed_pointcloud = "data_preparation.threed_pointcloud:PointCloud3D"
+
+[tool.setuptools.packages.find]
+where = ["data_preparation"]
+include = ["data_preparation.cameras", "data_preparation.pdal", "data_preparation.cropping", "data_preparation.rasterisation", "data_preparation.threed_pointcloud"]
+namespaces = false
+
+[project]
+name = "pointcloud_extraction"
+version = "0.0.1.1"
+authors = [
+  { name="Dhruv Malik", email="Dhruv@extralabs.xyz" },
+]
+description = "package consisting of the scripts for operating on the point cloud / photogrammetric data"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+
+
+
+
+[project.urls]
+Homepage = "https://github.com/the-extra-project/geospatial-pipelines"
+Issues = "https://github.com/the-extra-project/geospatial-pipelines/issues"

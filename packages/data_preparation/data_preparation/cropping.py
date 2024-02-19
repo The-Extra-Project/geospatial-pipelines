@@ -240,7 +240,6 @@ class CroppingUtilsSHP():
         check_call( ["7z", "-y", "x", fname] ) 
         pipeline_ipfs = self.ipfs_cid
         self.generate_pdal_pipeline( dirname, pipeline_ipfs, self.username )
-        # run pdal pipeline with the generated json :
         
         os.chdir( dirname )
         ## here the laz filename is written based on the various categories of the pointclouds for the given region        

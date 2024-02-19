@@ -35,20 +35,12 @@ class ColmapDataParsing():
     filepath: is the current folder path for the given images / videos
     type: 0 for the image and 1 for photos that are decked.
     """
-    datafolder:pathlib.Path
-    datatype:int ## whether its an video (0) or an image(1)
-    output_dir:pathlib.Path ## stores the output images (that are recalibrated).
+    datafolder:pathlib.Path ## stores the path of the video / or the initial version of the images from the user.
+    output_dir:pathlib.Path ## stores the output images (that are  recalibrated and the generated point cloud from).
     def __init__(self,filepath, output_dir):
         self.datafolder = filepath
         self.output_dir = output_dir
         
-    def fetch_frame(self,downsampling_rate, count):  
-        video = cv2.VideoCapture(self.datafolder)
-        video.set(cv2.CAP_PROP_POS_MSEC, downsampling_rate * 1000)
-        frame, image = video.read()
-        if frame:
-            cv2.imwrite(os.absself.filepath+"filepath_ds_" + downsampling_rate + str(count) + ".jpg",image)
-        return frame
     def convert_video_to_photo(self, downsampling_rate):
         """
         using opencv in order to slicing the images from the video.
