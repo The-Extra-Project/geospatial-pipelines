@@ -1,16 +1,27 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    "target": "ES2018",
+    "lib": ["ES2018","DOM"],
+    "baseUrl": ".",
     "module": "CommonJS",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "strict": true,
+    "strict": false,
     "skipLibCheck": true,
+    "moduleResolution": "Node",
+    "typeRoots": ["./node_modules/@types"],
     "resolveJsonModule": true,
     "allowJs": true,
     "outDir": "dist",  
+    "rootDir": ".",
+    "noImplicitAny": true,  
+    // for the skipping of the .dts files etc.
+    "skipDefaultLibCheck": true /* Skip type checking .d.ts files that are included with TypeScript. */,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
   },
-  "include": ["./scripts", "./test", "./typechain-types"],
-  "files": [ "./hardhat.config.ts" ]
-
+  "include": ["scripts/**/*.ts", "test/", "chainlink-functions/**/*.ts"],
+  "exclude": ["node_modules"],
+  "files": ["./hardhat.config.ts", "index.ts"]
+  
 }

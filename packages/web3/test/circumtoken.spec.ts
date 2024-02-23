@@ -1,4 +1,4 @@
-import {tokenContractAPI} from "../scripts/contractAPI"
+import {tokenContractAPI} from "../scripts/tokenAPI"
 import {deployContracts} from '../scripts/deploy'
 import ethers from "ethers"
 import {config} from "dotenv" 
@@ -12,7 +12,9 @@ describe("circumToken deployment", async () => {
         const mumbai_testnet = "80001"
         const private_key = env_path["PRIVATE_KEY"]    
         let api = new tokenContractAPI(tokenAddress ,wallet.getAddress(), mumbai_testnet, private_key )
-            console.log("address is deployed at" + api.circumTokenAddress);
+        console.log("address is deployed at" + api.circumTokenAddress);
+        
+        
         }
     ); 
 })

@@ -1,13 +1,14 @@
 import { ethers } from "hardhat"
 import { CircumToken, IndividualContributionStruct } from '../typechain-types/contracts/CircumToken'
-import { CircumToken__factory } from '../typechain-types/factories/contracts/CircumToken__factory'
-import { MinEthersFactory } from "../typechain-types/common"
-import { HardhatEthersHelpers } from "hardhat/types"
 //const contractFactoryCircum = ethers.getContractFactory("CircumToken")
 
+/**
+ * a test script to test the functions on top of 
+ */
+
 export class tokenContractAPI {
-    CircumToken: Promise<CircumToken>
-    circumTokenAddress: typeof ethers.constants.AddressZero
+    CircumToken: any
+    circumTokenAddress: any
     userWallet: any
     provider: any
 
@@ -27,7 +28,7 @@ export class tokenContractAPI {
         let status_output;
         try {
 
-            status_output = (await this.CircumToken).addIndividualContribution(address, inputParams).then((output) => {
+            status_output = (await this.CircumToken).addIndividualContribution(address, inputParams).then((output: any) => {
                 console.log('parameters added are:', output)
             });
         }

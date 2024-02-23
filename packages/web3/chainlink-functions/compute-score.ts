@@ -1,6 +1,6 @@
 import ethers from "ethers"
-import {CircumToken, CircumTokenInterface, IndividualContributionStruct } from "../typechain-types/contracts/CircumToken"
-import { CircumToken__factory } from "../typechain-types"
+import {CircumToken, CircumTokenInterface, IndividualContributionStruct } from "../scripts/typechain-types/contracts/CircumToken"
+import { CircumToken__factory } from "../scripts/typechain-types"
 
 /**
  * calls `CircumToken.addIndividualContributor(....) parameter `

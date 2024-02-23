@@ -3,10 +3,19 @@
   "version": "0.1.0",
   "description": "package to deploy the smart contracts that associate the tokens to the various clients proportional to their contribution",
   "main": "index.ts",
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
-    "test": "jest",
+    "test:abstractWallet": "jest dist/test/comethWallet.spec.js",
+    "test:wallet": "jest scripts/comethWallet.spec.ts",
     "run-function": "ts-node ./chainlink-functions/request.ts",
     "deploy:token:mumbai": "hardhat run scripts/deploy.ts --network polygonMumbai",
+    "verify:token:mumbai": "npx hardhat verify --network polygonMumbai --constructor-args parameters.js",
+    "build": "rm -rf dist/ && tsc && tsc-alias",
+    "test:comethWallet": "nodemon --exec npm run build",
+    "task:comethWallet": "hardhat wallet --network polygonMumbai",
+    "test:token": "npx hardhat test scripts/circumtoken.spec.ts --network polygonMumbai",
     "compile": "npx hardhat compile"
   },
   "keywords": [
@@ -29,6 +38,7 @@
     "hardhat": "^2.19.4",
     "hardhat-verify": "^1.0.0",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.8",
     "typescript": "^5.3.3"
   },
   "devDependencies": {
@@ -38,7 +48,8 @@
     "@typechain/ethers-v6": "^0.5.1",
     "@typechain/hardhat": "^9.1.0",
     "@types/jest": "^29.5.12",
-    "ethers": "^5.7.2",
+    "ethers": "^5.7.0",
+    "nodemon": "^3.0.3",
     "typechain": "^8.3.2"
   }
 }
