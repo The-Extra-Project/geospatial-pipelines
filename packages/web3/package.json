@@ -1,18 +1,21 @@
 {
-  "name": "@geospatial-pipelines/web3",
+  "name": "@dev-extralabs/web3",
   "version": "0.1.0",
   "description": "package to deploy the smart contracts that associate the tokens to the various clients proportional to their contribution",
   "main": "index.ts",
   "files": [
-    "dist/**/*"
+    "dist/**/*.js", "chainlink-functions/**/*.ts", "scripts/**/*.ts"
   ],
+  "type": "module",
   "scripts": {
     "test:abstractWallet": "jest dist/test/comethWallet.spec.js",
-    "test:wallet": "jest scripts/comethWallet.spec.ts",
+    "test:wallet": " ts-node  ./dist/scripts/abstraction.js", 
     "run-function": "ts-node ./chainlink-functions/request.ts",
     "deploy:token:mumbai": "hardhat run scripts/deploy.ts --network polygonMumbai",
     "verify:token:mumbai": "npx hardhat verify --network polygonMumbai --constructor-args parameters.js",
-    "build": "rm -rf dist/ && tsc && tsc-alias",
+    "build": "rm -rf dist/ && tsc",
+    "run:chainlink:function_ex": "ts-node ./dist/chainlink-functions/request.js",
+    "dev:chainlink:test": "node ./dist/chainlink-functions/compute-score.js",
     "test:comethWallet": "nodemon --exec npm run build",
     "task:comethWallet": "hardhat wallet --network polygonMumbai",
     "test:token": "npx hardhat test scripts/circumtoken.spec.ts --network polygonMumbai",
@@ -37,6 +40,7 @@
     "expressjs": "^1.0.1",
     "hardhat": "^2.19.4",
     "hardhat-verify": "^1.0.0",
+    "solhint": "^4.1.1",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.8",
     "typescript": "^5.3.3"
@@ -48,8 +52,10 @@
     "@typechain/ethers-v6": "^0.5.1",
     "@typechain/hardhat": "^9.1.0",
     "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.20",
     "ethers": "^5.7.0",
     "nodemon": "^3.0.3",
+    "ts-jest": "^29.1.2",
     "typechain": "^8.3.2"
   }
 }

@@ -3,7 +3,7 @@
     "target": "ES2018",
     "lib": ["ES2018","DOM"],
     "baseUrl": ".",
-    "module": "CommonJS",
+    "module": "ESNext",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": false,
@@ -19,6 +19,9 @@
     "skipDefaultLibCheck": true /* Skip type checking .d.ts files that are included with TypeScript. */,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
+  },
+  "ts-node": {
+    "swc": true
   },
   "include": ["scripts/**/*.ts", "test/", "chainlink-functions/**/*.ts"],
   "exclude": ["node_modules"],

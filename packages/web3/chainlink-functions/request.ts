@@ -3,8 +3,8 @@
  * 
  * Script for chainlink-functions for generating the 
  */
-
 import fs from "fs"
+import {config} from "dotenv"
 import {
     SubscriptionManager,
     simulateScript,
@@ -13,8 +13,17 @@ import {
     decodeResult,
     FulfillmentCode,
 } from "@chainlink/functions-toolkit"
+import {BigNumberish} from "ethers"
 
-import FunctionsClient from "@chainlink/contracts/abi/v0.8/FunctionsClient.json"
+config()
+import FunctionsClient from "@chainlink/contracts/abi/v0.8/FunctionsClient.json" assert { type: "json" };
+
+
+export type IndividualContributionStruct = {
+  clientContribution: BigNumberish;
+  reallignmentParameter: BigNumberish;
+};
+
 
 import path from "path"
 
@@ -22,26 +31,26 @@ import path from "path"
 
 import { ethers } from "ethers";
 
-import { config } from "@chainlink/env-enc";
 
-
-const consumerAddress = "" // its the address for the deployed circum token
+const consumerAddress = "0x66fd19Dcd8a8A144415b5C2274B6dD737f639B7B" // its the address for the deployed circum token
 const subscriptionId = ""; // also generated after the signing the transaction following the steps here: https://docs.chain.link/chainlink-functions/resources/architecture#subscription-management
 
 
-const requestFunctionContribution = async (args: any, gasLimit: number) => {
 
+export const requestFunctionContribution = async (args: string[], gasLimit: number) => {
+    const __dirname = path.join(path.dirname(process.cwd()),"web3", "dist", "chainlink-functions" )
+    console.log("current pathdir: " + __dirname)
     // parameters are defined on the 
     const routerAddress = "0x6E2dc0F9DB014aE19888F539E59285D2Ea04244C";
     const linkTokenAddress = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB";
     const donId = "fun-polygon-mumbai-1";
     const explorerUrl = "https://mumbai.polygonscan.com";
 
-    const fileSrc = fs.readFileSync(path.resolve(__dirname, './compute-score.ts')).toString()
+    const fileSrc = fs.readFileSync(path.resolve(__dirname, './compute-score.js')).toString()
     const rpcUrl = process.env.POLYGON_MUMBAI_RPC_URL; // fetch mumbai RPC URL
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
 
-    const wallet = new ethers.Wallet(process.env.PRIV_KEY as any)
+    const wallet = new ethers.Wallet(process.env.PRIVATE_KEY as any)
     const signer = await (wallet.connect(provider) as ethers.Signer)
 
     console.log('running the compute-score function on chainlink functions onchain .....')
@@ -50,8 +59,8 @@ const requestFunctionContribution = async (args: any, gasLimit: number) => {
         const response = await simulateScript({
             source: fileSrc,
             args: args,
-            bytesArgs: [], // bytesArgs - arguments can be encoded off-chain to bytes.
-            secrets: {}, // no secrets in this example       
+            bytesArgs: [], 
+            secrets: {}, 
         })
         console.log("Simulation result", response);
 
@@ -121,7 +130,9 @@ const requestFunctionContribution = async (args: any, gasLimit: number) => {
   const responseListener = new ResponseListener({
     provider: provider,
     functionsRouterAddress: routerAddress,
-  }); // Instantiate a ResponseListener object to wait for fulfillment.
+  });
+  
+// Instantiate a ResponseListener object to wait for fulfillment.
   (async () => {
     try {
       const response: any = await new Promise((resolve, reject) => {
@@ -190,7 +201,23 @@ const requestFunctionContribution = async (args: any, gasLimit: number) => {
     }
 
     catch (e: any) {
-        console.error('in the outer function for execution of contribution function')
+        console.error('in the outer function for execution of contribution function' + (e))
     }
 
 }
+
+
+let contribution : IndividualContributionStruct = {
+clientContribution: 90,
+reallignmentParameter: 10
+
+}
+
+let args = [contribution.clientContribution.toString(), contribution.reallignmentParameter.toString()]
+
+requestFunctionContribution(args,30000).then(() => process.exit(0))
+.catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
+

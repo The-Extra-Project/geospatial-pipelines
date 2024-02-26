@@ -57,7 +57,7 @@ export const network_params =  {
 
 const config: HardhatUserConfig | SolcConfig = {
   solidity: "0.8.24",
-
+  defaultNetwork:"polygonMumbai",
   networks: {
     ...network_params
   },

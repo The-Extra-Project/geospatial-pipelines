@@ -16,7 +16,6 @@ contract CircumToken is ERC20, AccessControl {
     address keeperAddress; // address of the keeper bot (that essentially calls the mint function as soon as the results of the reconstruction are generated).
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE"); // attributed to the admin to transfer the token from the user.
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
-    
     constructor(uint _tokenMultiplier, address _oracleAddress, address _keeperAddress) ERC20("circumToken", "CT") {
         tokenMultiplier = _tokenMultiplier;
         oracleAddress = _oracleAddress;

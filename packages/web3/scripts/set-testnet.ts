@@ -1,19 +1,33 @@
-import * as process from "process";
-import * as path from "path";
-import * as fs from "fs";
-import { startLocalFunctionsTestnet } from "@chainlink/functions-toolkit";
-import { utils, Wallet } from "ethers";
-import { config } from "@chainlink/env-enc";
-import * as envConfig from "@chainlink/env-enc/dist/EncryptedEnv";
+import * as process from 'process';
+import * as path from 'path';
+import * as fs from 'fs';
+import { startLocalFunctionsTestnet } from '@chainlink/functions-toolkit';
+import { utils, Wallet } from 'ethers';
+import { config } from '@chainlink/env-enc';
+import * as envConfig from '@chainlink/env-enc/dist/EncryptedEnv';
 
 //import {dotenv} from "dotenv"
 // Load environment variables from .env.enc file (if it exists)
-const envConfig: encryptedEnc = require("../.env.enc");
+//  let envconfig = new envConfig.default({
+//   path: path.join(__dirname, '../.env.enc'),
+//  })
 
-envConfig.load();
+//envconfig.load();
+
+let Envconfig: any = config(
+  {
+    path: path.join(process.cwd(), 'web3', ".env.enc"),
+  }
+);
+
+
+Envconfig.load();
 
 (async () => {
-  const requestConfigPath = path.join(process.cwd(), "functions-request-config.js"); // @dev Update this to point to your desired request config file
+  const requestConfigPath = path.join(
+    process.cwd(),
+    'functions-request-config.js'
+  ); // @dev Update this to point to your desired request config file
   console.log(`Using Functions request config file ${requestConfigPath}\n`);
 
   const localFunctionsTestnetInfo = await startLocalFunctionsTestnet(
@@ -28,38 +42,34 @@ envConfig.load();
   );
 
   console.table({
-    "FunctionsRouter Contract Address": localFunctionsTestnetInfo.functionsRouterContract.address,
-    "DON ID": localFunctionsTestnetInfo.donId,
-    "Mock LINK Token Contract Address": localFunctionsTestnetInfo.linkTokenContract.address,
+    'FunctionsRouter Contract Address':
+      localFunctionsTestnetInfo.functionsRouterContract.address,
+    'DON ID': localFunctionsTestnetInfo.donId,
+    'Mock LINK Token Contract Address':
+      localFunctionsTestnetInfo.linkTokenContract.address,
   });
 
   // Fund wallets with ETH and LINK
-  const addressToFund: string = new Wallet(process.env["PRIVATE_KEY"]).address;
-  await localFunctionsTestnetInfo.getFunds(
-    addressToFund,
-    {
-      weiAmount: utils.parseEther("100").toString(), // 100 ETH
-      juelsAmount: utils.parseEther("100").toString(), // 100 LINK
-    }
-  );
+  const addressToFund: string = new Wallet(process.env['PRIVATE_KEY']).address;
+  await localFunctionsTestnetInfo.getFunds(addressToFund, {
+    weiAmount: utils.parseEther('100').toString(), // 100 ETH
+    juelsAmount: utils.parseEther('100').toString(), // 100 LINK
+  });
 
-  if (process.env["SECOND_PRIVATE_KEY"]) {
+  if (process.env['SECOND_PRIVATE_KEY']) {
     const secondAddressToFund: string = new Wallet(
-      process.env["SECOND_PRIVATE_KEY"]
+      process.env['SECOND_PRIVATE_KEY']
     ).address;
-    await localFunctionsTestnetInfo.getFunds(
-      secondAddressToFund,
-      {
-        weiAmount: utils.parseEther("100").toString(), // 100 ETH
-        juelsAmount: utils.parseEther("100").toString(), // 100 LINK
-      }
-    );
+    await localFunctionsTestnetInfo.getFunds(secondAddressToFund, {
+      weiAmount: utils.parseEther('100').toString(), // 100 ETH
+      juelsAmount: utils.parseEther('100').toString(), // 100 LINK
+    });
   }
 
   // Update values in networks.js
-  let networksConfig = fs.readFileSync(
-    path.join(process.cwd(), "networks.js")
-  ).toString();
+  let networksConfig = fs
+    .readFileSync(path.join(process.cwd(), 'networks.js'))
+    .toString();
   const regex = /localFunctionsTestnet:\s*{\s*([^{}]*)\s*}/s;
   const newContent = `localFunctionsTestnet: {
     url: "http://localhost:8545/",
@@ -71,5 +81,5 @@ envConfig.load();
     donId: "${localFunctionsTestnetInfo.donId}",
   }`;
   networksConfig = networksConfig.replace(regex, newContent);
-  fs.writeFileSync(path.join(process.cwd(), "networks.js"), networksConfig);
+  fs.writeFileSync(path.join(process.cwd(), 'networks.js'), networksConfig);
 })();
