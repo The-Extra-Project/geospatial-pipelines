@@ -1,0 +1,8 @@
+streamlit
+streamlit-extras
+python-dotenv
+leafmap
+mysqlclient
+pymysql
+Django
+SQLAlchemy

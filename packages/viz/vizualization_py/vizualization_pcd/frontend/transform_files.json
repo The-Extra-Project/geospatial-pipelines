@@ -1,0 +1,15 @@
+{   
+    "pipeline": [
+        "translated_netherlands.las",
+    {
+        "type": "filters.crop",
+        "bounds":"POINT(155300, 503250,194)",
+        "distance": "50"
+    },
+    {   "type": "writers.las",
+        "filename": "cropped-nh.las"
+    }
+
+]
+
+}
