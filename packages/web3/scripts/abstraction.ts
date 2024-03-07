@@ -9,7 +9,8 @@ import { BigNumberish, ethers } from 'ethers';
 
 import * as dotenv from 'dotenv';
 dotenv.config();
-import { CircumToken__factory } from './typechain-types';
+import { CircumToken } from './typechain-types/';
+import { CircumToken__factory } from '@dev-extralabs/web3/scripts/typechain-types';
 
 /**
  * adding the window property inn order to avoid the error "Window not provided"
@@ -30,11 +31,11 @@ export type IndividualContributionStruct = {
 };
 
 export class AbstractedWalletCometh {
-  chainId: SupportedNetworks;
+  chainId: any;
   private sessionToken: Map<string, string[]>; // this is the authentification token that is associated for given time once the Oauth is verified.
   private walletAdaptor: ConnectAdaptor;
   public wallet: ComethWallet;
-  tokenContract: any;
+  tokenContract: ethers.Contract;
   private provider: ComethProvider;
   constructor(
     chainId: SupportedNetworks,
@@ -52,18 +53,13 @@ export class AbstractedWalletCometh {
     this.wallet = new ComethWallet({
       authAdapter: this.walletAdaptor,
       apiKey: process.env.COMETH_API_KEY || '',
-      rpcUrl: process.env.RPC || 'https://api.connect.cometh.io/',
     });
 
     this.provider = new ComethProvider(this.wallet);
 
     // this.tokenContract = new tokenContractAPI(token, "80001", userId)
     const signer = this.provider.getSigner();
-    this.tokenContract = new ethers.Contract(
-      tokenAddress,
-      CircumToken__factory.abi,
-      signer
-    );
+    this.tokenContract = new CircumToken__factory(signer).attach(tokenAddress);
     this.sessionToken.set(this.wallet.getAddress(), [emailAddress, _validatedToken]);
   }
 
@@ -132,8 +128,8 @@ export class AbstractedWalletCometh {
   async getMintedToken(currentAddress: string): Promise<BigNumberish> {
     let balance: BigNumberish = ethers.BigNumber.from(0);
     try {
-      
-        balance = await this.tokenContract.balanceOf(
+
+      balance = await this.tokenContract.balanceOf(
         currentAddress
       );
     } catch (e: any) {
@@ -143,44 +139,21 @@ export class AbstractedWalletCometh {
     return balance;
   }
 
+  /**Gets the parameter of each data provider's set address by the user.
+   * @param userAddress: its the address of the suer whose dataset is defined and would like to get the contribution parameters.
+   * @returns a struct consisting of the 2 parameters (those sum out to be 100) as the perfectages for the correct subtracted by the effort porvided by the offers.
+   * 
+   */
+  async getIndividualContribution(userAddress: any): Promise<any> {
+    let contributionParameters: any
+    try {
+      contributionParameters = await this.tokenContract.getIndividualContributions(userAddress)
 
+    }
+    catch (e: any) {
+      console.error("exception caused in the getIndividualContributions")
+    }
 
-
+    return contributionParameters;
+  }
 }
-
-
-const main = async (address_connect: string): Promise<void> => {
-    const tokenAddress = '0x66fd19Dcd8a8A144415b5C2274B6dD737f639B7B';
-    const oracleAddress = '0x36E8895442C8D90419a0a791D117339B78CbB656';
-    let sessionToken: Map<string, string> = new Map();
-    let abstractToken = new AbstractedWalletCometh(
-      SupportedNetworks.MUMBAI,
-      sessionToken,
-      tokenAddress,
-      'malikdhruv1994@gmail.com'
-    );
-  
-    const parameter_vars: IndividualContributionStruct = {
-      clientContribution: '90',
-      reallignmentParameter: '10',
-    };
-      console.log(
-        'wallet getting connected w/ params',
-        await abstractToken.connect(address_connect)
-      );
-      await abstractToken.addIndividualContribution(
-        oracleAddress,
-        parameter_vars
-      );
-      await abstractToken.mintTokenAddress(oracleAddress);
-  
- 
-}
-main('0x24931b9591677E6b858e697cB3f3867BB19a73FA')
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
-
-

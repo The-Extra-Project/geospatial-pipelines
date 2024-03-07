@@ -6,7 +6,7 @@ import { CircumToken__factory } from "scripts/typechain-types"
 const tokenInterface = new ethers.utils.Interface(CircumToken__factory.abi)
 
 /**
- * calls `CircumToken.addIndividualContributor(....) parameter `
+ * calls `CircumToken.addIndividualContributor(....)`
  * @param walletInstance 
  */
 const ContributeMetric = async (tokenAddress: string, signerInstance:  any, clientAddress: any, params: IndividualContributionStruct ) => {

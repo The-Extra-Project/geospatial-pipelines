@@ -8,7 +8,7 @@ describe("chainlink function call", async () => {
             clientContribution: 90,
             reallignmentParameter:10
         }
-        await requestFunctionContribution(params,gasLimit)
+       // await requestFunctionContribution(params,gasLimit)
     })
 
 

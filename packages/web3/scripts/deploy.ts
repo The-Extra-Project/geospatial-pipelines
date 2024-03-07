@@ -2,8 +2,9 @@ import { ethers } from 'hardhat';
 
 let address_outputs: Map<string, string>;
 export async function deployContracts() {
-  const oracleAddress = '0x36E8895442C8D90419a0a791D117339B78CbB656';
-  const keeperAddress = '0x36E8895442C8D90419a0a791D117339B78CbB656';
+  // these are addresses that have to compute the results from the chainlink and keeper address correspondingly.
+  const oracleAddress = '';
+  const keeperAddress = '';
   const multiplicationFactor: any = 7;
   const ctFactory = await ethers.getContractFactory('CircumToken');
   const stakingContract = await ethers.getContractFactory(
