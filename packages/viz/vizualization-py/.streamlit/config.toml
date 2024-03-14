@@ -1,4 +1,0 @@
-[server]
-
-# Default: 200
-maxUploadSize = 20000

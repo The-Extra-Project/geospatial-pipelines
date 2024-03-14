@@ -6,3 +6,6 @@ mysqlclient
 pymysql
 Django
 SQLAlchemy
+flytekitplugins-bacalhau
+bacalhau-sdk
+eth-ape>=0.7.11 ## optional: in order to integrate the read operatioàns directly in the frontend

@@ -32,7 +32,7 @@ import path from "path"
 import { ethers } from "ethers";
 
 
-const consumerAddress = "0x66fd19Dcd8a8A144415b5C2274B6dD737f639B7B" // its the address for the deployed circum token
+const consumerAddress = "" // its the address for the deployed circum token
 const subscriptionId = ""; // also generated after the signing the transaction following the steps here: https://docs.chain.link/chainlink-functions/resources/architecture#subscription-management
 
 
@@ -40,7 +40,7 @@ const subscriptionId = ""; // also generated after the signing the transaction f
 export const requestFunctionContribution = async (args: string[], gasLimit: number) => {
     const __dirname = path.join(path.dirname(process.cwd()),"web3", "dist", "chainlink-functions" )
     console.log("current pathdir: " + __dirname)
-    // parameters are defined on the 
+    // parameters are defined based on the mumbai testnet.
     const routerAddress = "0x6E2dc0F9DB014aE19888F539E59285D2Ea04244C";
     const linkTokenAddress = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB";
     const donId = "fun-polygon-mumbai-1";
@@ -207,17 +207,16 @@ export const requestFunctionContribution = async (args: string[], gasLimit: numb
 }
 
 
-let contribution : IndividualContributionStruct = {
-clientContribution: 90,
-reallignmentParameter: 10
+// let contribution : IndividualContributionStruct = {
+// clientContribution: 90,
+// reallignmentParameter: 10
 
-}
+// }
 
-let args = [contribution.clientContribution.toString(), contribution.reallignmentParameter.toString()]
+// let args = [contribution.clientContribution.toString(), contribution.reallignmentParameter.toString()]
 
-requestFunctionContribution(args,30000).then(() => process.exit(0))
-.catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
-
+// requestFunctionContribution(args,30000).then(() => process.exit(0))
+// .catch((error) => {
+//   console.error(error);
+//   process.exit(1);
+// });

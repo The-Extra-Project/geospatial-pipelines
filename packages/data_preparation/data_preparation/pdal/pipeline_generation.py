@@ -4,11 +4,10 @@ import requests
 import logging
 import os
 import re
+import jsonlib
 from dataclasses import dataclass
-import pdal
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-import jsonlib
 import tempfile
 from subprocess import check_call
 """
@@ -117,7 +116,7 @@ class PDAL_json_generation_template():
             file_id=fileid
         )
         
-        return True if fileId is not '' else False
+        return True if fileId != '' else False
         
 
 @dataclass
@@ -133,10 +132,11 @@ class PDAL_template_manual():
     def json_gdal_base(self,filename, output_type, radius, resolution=1, bounds=None):
         """ Create initial JSON for PDAL pipeline containing a Writer element 
         filename : the filename of the output file
-        
+        output_type : the type of the output file (output file of the given dataset of type: writers.las, writers.ply ).
+        radius: is the given area of the point cloud that you want to crop.
+        bounds: is the given area of the point cloud that you want to crop (its defined by 4 points : minx, miny, maxx, maxy).
         """
         json = self.pipeline
-
         d = {
         'type': 'writers.gdal',
         'resolution': resolution,

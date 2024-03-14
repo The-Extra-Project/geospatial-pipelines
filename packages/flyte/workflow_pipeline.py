@@ -5,8 +5,13 @@ import asyncio
 import json
 from typing import List
 import logging
-
 logging.getLogger(__file__)
+import os
+dockerlist = [
+    "dexextralabs/data_preparation",
+    "devextralabs/neuralangelo",
+    "pdal/pdal"
+]
 
 class GeospatialPipelineTaskQueue:
     """
@@ -18,6 +23,7 @@ class GeospatialPipelineTaskQueue:
     workflow_tasks_object: any
     workflow_current: int   
     tasks_queue:any
+    json_file: any
     
     def __init__(self):
         self.version = "v0.1"
@@ -58,59 +64,18 @@ class GeospatialPipelineTaskQueue:
             exit
         return dequed_task        
     
-#    @workflow
-    # async def workflow_execution(self,specs_json):
-    #     """
-    #     this function runs all of the tasks that are stored in the queue by running the enqueing the tasks one by one.
-    #     specs_json are the json specifications of the bacalhau that are to be executed with the deququed operation
-    #     """
-        
-        # while True:
-        #     task_queue = await self.dequeue_task()
-        #     if task_queue is None:
-        #         break
-        #     task = task_queue(
-        #         api_version = self.version,
-        #         spec = dict(specs_json)
-        #     )
-
-        #     print(task)
-
 @workflow
-async def workflow_execution():
+async def workflow_execution(json_file_path: str):
     ## gives the various tasks to be executed in the project.
     ## credits to the example from bacalhau flyte project.
     
-    specs_json = [
-
-            dict( engine="Docker",
-            verifier="Noop",
-            PublisherSpec={"type": "IPFS"},
-            docker={
-                "image": "ubuntu",
-                "entrypoint": ["echo", "Flyte is awesome and with Bacalhau it's even better!"],
-            },
-            language={"job_context": None},
-            wasm=None,
-            resources=None,
-            timeout=1800,
-            outputs=[
-                {
-                    "storage_source": "IPFS",
-                    "name": "outputs",
-                    "path": "/outputs",
-                }
-            ],
-            deal={"concurrency": 1},
-            ),
-
-            dict(
+    specs_json = dict( 
             engine="Docker",
             verifier="Noop",
             PublisherSpec={"type": "IPFS"},
             docker={
                 "image": "ubuntu",
-                "entrypoint": ["cat", "/myinputs/stdout"],
+                "entrypoint": ["docker", "run", "pdal/pdal", "pdal", "pipeline", " --stdin ", "<" ,json_file_path ],
             },
             language={"job_context": None},
             wasm=None,
@@ -123,26 +88,15 @@ async def workflow_execution():
                     "path": "/outputs",
                 }
             ],
-            inputs=[
-                {
-                    "cid": specs_json[0],
-                    "name": "myinputs",
-                    "path": "/myinputs",
-                    "storageSource": "IPFS",
-                }
-            ],
             deal={"concurrency": 1},
-        )
-    ]
+            )
+
     
     tasks = GeospatialPipelineTaskQueue()
     
     tasks.enqueue_task("task_1")
-    tasks.enqueue_task("task_2")
     
     #tasks.workflow_execution(specs_json=specs_json)
-    
-    
     while True:
         task_queue = await tasks.dequeue_task()
         if task_queue is None:
@@ -155,6 +109,7 @@ async def workflow_execution():
         print(task)
 
 
+demo_template = "./datas/pdal_transformation.json"
 
 if __name__ == "__main__":
     workflow_execution()

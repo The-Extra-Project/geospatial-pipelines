@@ -9,11 +9,13 @@ from bacalhau_apiclient.models.job_spec_language import JobSpecLanguage
 from bacalhau_apiclient.models.storage_spec import StorageSpec
 import time
 import boto3
+import pylas
 from bacalhau_apiclient.models.job_spec_docker import JobSpecDocker
 from bacalhau_apiclient.models.publisher_spec import PublisherSpec
 from bacalhau_apiclient.models.deal import Deal
 from dotenv import load_dotenv
 from bs4 import BeautifulSoup
+
 import datetime
 load_dotenv()
 base_url_lidarhd = os.getenv("BASE_URL_LIDARHD")
@@ -158,12 +160,14 @@ def reconstruction_dashboard():
 
     if choice == "via 2D coordinates":
         st.write("enter the point of interest (in WGS 84 standard)")
-        X_coord = st.number_input("X coordinate", min_value=1)
-        Y_coord = st.number_input("Y coordinate", min_value=1)
+        X_coord = st.text_input("X coordinate")
+        Y_coord = st.number_input("Y coordinate")
         base_pipeline_spec["docker"]["image"] = pipeline[1]
         points = [X_coord, Y_coord]
         base_pipeline_spec["docker"]["entrypoint"].append(["python", "cropping.py", "--points", points, "--username",'st.session_state.email' ])
         execute = st.button("run the pipeline")
+        
+        lidarHD_params = st.write("enter the S3 bucket that you want to fetch the data from")
         
         params = dict(
         APIVersion='v0.1',
@@ -220,6 +224,3 @@ def poisson_SR_dashboard():
 
 
 reconstruction_dashboard()
-## 
-## documents
-## 7,10 , 9 , 12 , 0 , 3

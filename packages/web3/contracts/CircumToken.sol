@@ -23,7 +23,11 @@ contract CircumToken is ERC20, AccessControl {
         _grantRole(MINTER_ROLE, _keeperAddress);
         _grantRole(ORACLE_ROLE, oracleAddress);
     }
-
+    /**
+     * function for adding individual contribution parameters of the given client.
+     * @param _clientAddress 
+     * @param _contribution 
+     */
     function addIndividualContribution(address _clientAddress, IndividualContribution memory _contribution)  public returns(bool) {
         assert(_clientAddress != address(0) && hasRole(ORACLE_ROLE, msg.sender) );
         contributionMetrics[_clientAddress] = _contribution;
@@ -41,6 +45,7 @@ contract CircumToken is ERC20, AccessControl {
     }
 
     function mintToken(address _clientAddress)  public returns(bool) {
+
         assert(_clientAddress != address(0) && hasRole(MINTER_ROLE, msg.sender) && contributionMetrics[_clientAddress].clientContribution > contributionMetrics[_clientAddress].reallignmentParameter );
         uint tokenToBeMinted =  contributionMetrics[_clientAddress].clientContribution - (tokenMultiplier * contributionMetrics[_clientAddress].reallignmentParameter );
         _mint(_clientAddress, tokenToBeMinted);

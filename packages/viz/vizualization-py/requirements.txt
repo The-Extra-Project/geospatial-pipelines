@@ -1,4 +1,0 @@
-streamlit
-geospatial-pipelines
-streamlit-extras
-python-dotenv

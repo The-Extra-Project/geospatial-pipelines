@@ -2,7 +2,6 @@
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
-
 [project.scripts]
 colmap = "data_preparation.cameras.utils:ColmapDataParsing"
 nerfstudio = "data_preparation.cameras.utils:NerfStudioCameraUtils"
@@ -18,7 +17,7 @@ namespaces = false
 
 [project]
 name = "pointcloud_extraction"
-version = "0.0.1.1"
+version = "0.0.1.2"
 authors = [
   { name="Dhruv Malik", email="Dhruv@extralabs.xyz" },
 ]
@@ -34,10 +33,6 @@ dynamic = ["dependencies"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
-
-
-
-
 
 [project.urls]
 Homepage = "https://github.com/the-extra-project/geospatial-pipelines"

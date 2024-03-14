@@ -3,5 +3,7 @@
     "cmake.configureOnOpen": false,
     "solidity.remappings": ["@openzeppelin/=node_modules/@openzeppelin/","@chainlink/=node_modules/chainlink/"],
     "python.defaultInterpreterPath": ".venv/bin/python3",
-    "solidity.defaultCompiler": "localNodeModule"
+    "solidity.defaultCompiler": "localNodeModule",
+    "python.analysis.autoImportCompletions": false,
+    "python.analysis.typeCheckingMode": "off"
 }

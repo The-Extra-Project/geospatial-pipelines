@@ -1,7 +1,12 @@
 {
   "compilerOptions": {
     "target": "ES2018",
-    "lib": ["ES2018","DOM"],
+    "lib": [
+      "ES2018",
+      "DOM"
+    ],
+    "types": ["node", "jest", "mocha"],
+    "emitDeclarationOnly": false,
     "baseUrl": ".",
     "module": "ESNext",
     "esModuleInterop": true,
@@ -10,12 +15,20 @@
     "jsx": "react",
     "skipLibCheck": true,
     "moduleResolution": "Node",
-    "typeRoots": ["./node_modules/@types"],
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "composite": true,
     "resolveJsonModule": true,
     "allowJs": true,
-    "outDir": "dist",  
+    "outDir": "dist",
     "rootDir": ".",
-    "noImplicitAny": true,  
+    "noImplicitAny": true,
+    "paths": {
+      "@web3/*": [
+        "./*"
+      ]
+    },
     // for the skipping of the .dts files etc.
     "skipDefaultLibCheck": true /* Skip type checking .d.ts files that are included with TypeScript. */,
     "allowSyntheticDefaultImports": true,
@@ -24,8 +37,18 @@
   "ts-node": {
     "swc": true
   },
-  "include": ["scripts/**/*.ts", "test/", "chainlink-functions/**/*.ts"],
-  "exclude": ["node_modules"],
-  "files": ["./hardhat.config.ts", "index.ts"]
-  
+  "include": [
+    "scripts/",
+    "test/",
+    "chainlink-functions/",
+    "server/"
+   ],
+  "exclude": [
+    "node_modules",
+  ],
+  "files": [
+    "./hardhat.config.ts",
+    "index.ts"
+  ]
 }
+

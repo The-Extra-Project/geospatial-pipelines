@@ -24,6 +24,8 @@ let Envconfig: any = config(
 Envconfig.load();
 
 (async () => {
+
+  console.log("starting local testnet with the path: " + path.join(process.cwd(), 'web3', ".env.enc"));
   const requestConfigPath = path.join(
     process.cwd(),
     'functions-request-config.js'
@@ -37,7 +39,7 @@ Envconfig.load();
         debug: false,
         verbose: false,
         quiet: true, // Set this to `false` to see logs from the local testnet
-      },
+      }, 
     }
   );
 

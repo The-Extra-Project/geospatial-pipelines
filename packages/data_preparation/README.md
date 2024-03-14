@@ -10,15 +10,14 @@ This package provides the tools and utils for the first stage of the operation a
 - Install from the pip directory: `pip install pointcloud_extraction_toolkit`.
 - Or via the source by cloning the whole [geospatial-pipeline]() and then installing the file via the `pip install -r requirements.txt`.
 
-
 ## Various packages:
 
 | package_file | remarks |
 | ------------- | ------------- |
-| cameras.utils | consist of methods to use the API across colmap / neuralangelo for photogrammetry |
-| pdal.pipeline_generation | scripts to generate the pipeline for PDAL to do necessary transformations |
-| cropping | Script to crop the given portion that you want to fetch. |
-| threed_pointcloud | script that integrates the [open3D](https://www.open3d.org) for 3D data cropping at microlevel | 
+| data_prepatation.cameras.utils | consist of methods to use the API across colmap / neuralangelo for photogrammetry |
+| data_prepatation.pdal.pipeline_generation | scripts to generate the pipeline for PDAL to do necessary transformations |
+| data_prepatation.cropping | Script to crop the given portion that you want to fetch. |
+| data_prepatation.threed_pointcloud | script that integrates the [open3D](https://www.open3d.org) for 3D data cropping at microlevel | 
 
 
 ## API's :

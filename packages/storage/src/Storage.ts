@@ -163,5 +163,9 @@ export class LighthouseStorageAPI {
 }
 
 
+export class web3StorageAPI {
+        
+}
+
 
 

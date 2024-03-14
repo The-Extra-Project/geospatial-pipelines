@@ -1,5 +1,4 @@
 openai
-open3d
 geopandas
 openai
 laspy
@@ -8,8 +7,8 @@ pyshp
 pycrs
 pylas
 nerfstudio
-pycolmap==0.6.1
 opencv-python
 tyro
 pytest
 rasterio
+open3D

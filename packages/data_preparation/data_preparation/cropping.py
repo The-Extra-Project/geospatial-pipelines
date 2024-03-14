@@ -18,7 +18,7 @@ import pandas as pd
 from subprocess import check_call
 import shutil
 import shapefile
-from pdal.pipeline_generation import PDAL_template_manual
+from data_preparation.pdal.pipeline_generation import PDAL_template_manual
 import pycrs
 import geopandas as gpd
 
@@ -250,8 +250,6 @@ class CroppingUtilsSHP():
         check_call( ["pdal", "pipeline",pipeline_template] )
         
         print('resulting rendering successfully generated, now uploading the files to ipfs')
-        
-    
 
     def fetch_classification_laz(laz_fname):
         """
@@ -314,15 +312,15 @@ class CroppingUtilsLas():
             
             return pd.DataFrame(params, index=[0])      
         
-    async def pdal_cropping_pipeline():
+    async def pdal_cropping_pipeline(self, bounds, radius=0):
         """
         Generating the cropping transformation json file using the description template defined by the openai to the user teamplate . 
         
         """
         try:
             pdal_object = PDAL_template_manual()
-            
-            
+            pdal_object.add_reader_information(self.las_file_path)
+            pdal_object.json_gdal_base(self.las_file_path, )
             print("the application is finally generated: " + os.path.join('.', "transform_cropping.json"))
             assert os.path.isfile("transform_cropping.json") is True
             check_call(["pdal", "pipeline", "transform_cropping.json"])

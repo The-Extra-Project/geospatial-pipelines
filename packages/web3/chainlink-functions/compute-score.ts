@@ -2,7 +2,6 @@ import  ethers  from  "ethers"
 import {CircumToken, CircumTokenInterface, IndividualContributionStruct } from "scripts/typechain-types/contracts/CircumToken"
 import { CircumToken__factory } from "scripts/typechain-types"
 
-
 const tokenInterface = new ethers.utils.Interface(CircumToken__factory.abi)
 
 /**

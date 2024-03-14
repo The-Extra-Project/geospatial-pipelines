@@ -6,11 +6,7 @@ from aws_cdk import (
     aws_logs as logs,
     aws_ec2 as ec2,
     aws_lambda as _lambda,
-    aws_apigatewayv2 as api_gw,
-    aws_secretsmanager as  secrets,
-    
-    # aws_ecs_patterns as ecs_patterns,
-    # Names
+    aws_apigatewayv2 as api_gw
 )
 import json
 from pathlib import Path

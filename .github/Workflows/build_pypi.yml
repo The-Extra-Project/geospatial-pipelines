@@ -1,0 +1,26 @@
+name: Pipeline build passing to pyPI
+on:
+    push:
+        branches:
+            - dev 
+            - main
+    paths:
+        - '../../packages/data_preparation'
+    
+job:
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v4
+        - name: build data_pipeline package if published
+          uses: actions/setup-python@v4
+          working-directory: "../../packages/data_preparation"
+          run: python3 -m pip install  build --user
+        - name: Build a binary wheel and a source tarball
+          run: python3 -m build
+        - name: Store the distribution packages
+          uses: actions/upload-artifact@v3
+          with:
+            name: python-package-distributions
+            path: dist/
+
+  

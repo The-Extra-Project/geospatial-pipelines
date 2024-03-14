@@ -8,3 +8,21 @@
 **/datas
 **/node_modules
 **/dist
+**/shapefile
+**/lib
+## and always DONT INCLUDE the *.laz file, thats gonna cause issue with the need to include these files separately w/ large git files
+**/*.laz
+**/chainlink-mumbai
+**/dist
+**/colmap
+
+**/**.egg-info
+
+**/example-assets
+.nx/cache
+**/.streamlit
+**/webpack
+**/.next/** 
+
+
+## some example folders (NOT to be committed )

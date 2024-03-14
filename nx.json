@@ -1,20 +1,63 @@
 {
-    "targetDefaults": {
-      "build": {
-        "cache": true,
-        "dependsOn": [
-          "^build"
-        ]
+  "targetDefaults": {
+    "build": {
+      "cache": true,
+      "dependsOn": ["^build"]
+    },
+    "@nx/js:tsc": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["default", "^default"]
+    },
+    "@nx/vite:build": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["default", "^default"]
+    }
+  },
+  "projects": {
+    "data_preparation": {
+      "tags": []
+    }
+  },
+  "lint": {
+    "cache": true
+  },
+  "installation": {
+    "version": "17.2.8"
+  },
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "affected": {
+    "defaultBase": "dev"
+  },
+  "plugins": [
+    {
+      "plugin": "@nx/jest/plugin",
+      "options": {
+        "targetName": "test"
       }
     },
-      "projects": {
-        "data_preparation": {"tags": []}
-        },
-      "lint": {
-        "cache": true
+    {
+      "plugin": "@nx/vite/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "previewTargetName": "preview",
+        "testTargetName": "test",
+        "serveTargetName": "serve",
+        "serveStaticTargetName": "serve-static"
+      }
     },
-    "installation": {
-      "version": "17.2.8"
+    {
+      "plugin": "@nx/js",
+      "options": {
+        "analyzePackageJson": false
+      }
+    },
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "lint"
+      }
     }
+  ]
 }
-  
